@@ -73,18 +73,6 @@ function Login() {
             : (isRegister ? 'Regístrate para empezar tu prueba.' : 'Inicia sesión para gestionar tu negocio.')}
         </p>
 
-        {error && (
-          <div style={{ background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.3)', borderRadius: '10px', padding: '0.75rem 1rem', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '8px', color: '#f87171', fontSize: '0.88rem', textAlign: 'left' }}>
-            <AlertCircle size={16} style={{ flexShrink: 0 }} /> {error}
-          </div>
-        )}
-
-        {successMsg && (
-          <div style={{ background: 'rgba(16,185,129,0.1)', border: '1px solid rgba(16,185,129,0.3)', borderRadius: '10px', padding: '0.75rem 1rem', marginBottom: '1rem', color: '#10b981', fontSize: '0.88rem' }}>
-            ✅ {successMsg}
-          </div>
-        )}
-
         <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1.2rem' }}>
           <div style={{ textAlign: 'left' }}>
             <label style={{ display: 'block', marginBottom: '6px', color: 'rgba(255,255,255,0.7)', fontSize: '0.85rem' }}>Correo Electrónico</label>
@@ -96,7 +84,7 @@ function Login() {
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
                 <label style={{ display: 'block', color: 'rgba(255,255,255,0.7)', fontSize: '0.85rem' }}>Contraseña</label>
                 {!isRegister && (
-                  <button type="button" onClick={() => { setIsForgot(true); setError(''); setSuccessMsg(''); }} style={{ background: 'none', border: 'none', color: '#a5b4fc', fontSize: '0.8rem', cursor: 'pointer', padding: 0 }}>
+                  <button type="button" onClick={() => { setIsForgot(true); }} style={{ background: 'none', border: 'none', color: '#a5b4fc', fontSize: '0.8rem', cursor: 'pointer', padding: 0 }}>
                     ¿Olvidaste tu clave?
                   </button>
                 )}
@@ -119,7 +107,7 @@ function Login() {
           {isForgot 
             ? 'Regresar al ' 
             : (isRegister ? '¿Ya tienes cuenta?' : '¿No tienes cuenta?')}
-          <button onClick={() => { setIsRegister(!isRegister); setIsForgot(false); setError(''); setSuccessMsg(''); }}
+          <button onClick={() => { setIsRegister(!isRegister); setIsForgot(false); }}
             style={{ background: 'none', border: 'none', color: '#818cf8', cursor: 'pointer', fontWeight: 600, fontSize: '0.88rem', marginLeft: '4px' }}>
             {isForgot ? 'inicio de sesión' : (isRegister ? 'Inicia sesión' : 'Regístrate aquí')}
           </button>

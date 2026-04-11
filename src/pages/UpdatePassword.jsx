@@ -43,29 +43,9 @@ function UpdatePassword() {
 
         <h2 style={{ marginBottom: '0.4rem', fontSize: '1.8rem' }}>Nueva Contraseña</h2>
         <p style={{ color: 'rgba(255,255,255,0.5)', marginBottom: '2rem', fontSize: '0.9rem' }}>
-          {success ? '¡Actualizada correctamente!' : 'Ingresa tu nueva contraseña para acceder.'}
+          Ingresa tu nueva contraseña para acceder.
         </p>
 
-        {error && (
-          <div style={{ background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.3)', borderRadius: '10px', padding: '0.75rem 1rem', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '8px', color: '#f87171', fontSize: '0.88rem', textAlign: 'left' }}>
-            <AlertCircle size={16} style={{ flexShrink: 0 }} /> {error}
-          </div>
-        )}
-
-        {success ? (
-          <div>
-             <div style={{ background: 'rgba(16,185,129,0.1)', border: '1px solid rgba(16,185,129,0.3)', borderRadius: '10px', padding: '1rem', marginBottom: '1.5rem', color: '#10b981', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
-                <CheckCircle size={20} /> Ahora puedes ingresar a tu cuenta.
-             </div>
-             <button onClick={() => navigate('/login')} style={{
-                width: '100%', padding: '1rem', borderRadius: '10px', border: 'none',
-                background: 'linear-gradient(135deg, #6366f1, #ec4899)', color: 'white', fontWeight: 700, cursor: 'pointer',
-                fontSize: '1rem', transition: 'all 0.2s'
-              }}>
-                Ir al Inicio de Sesión
-              </button>
-          </div>
-        ) : (
           <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1.2rem' }}>
             <div style={{ textAlign: 'left' }}>
               <label style={{ display: 'block', marginBottom: '6px', color: 'rgba(255,255,255,0.7)', fontSize: '0.85rem' }}>Nueva Contraseña</label>
@@ -83,7 +63,6 @@ function UpdatePassword() {
               {loading ? '⏳ Guardando...' : 'Guardar y Entrar'}
             </button>
           </form>
-        )}
       </div>
     </div>
   );

@@ -27,37 +27,39 @@ function App() {
   const [currentNiche, setCurrentNiche] = useState('health');
 
   return (
-    <AuthProvider>
-      <BrowserRouter>
-        <Suspense fallback={<PageLoader />}>
-          <Routes>
-            {/* Rutas Públicas */}
-            <Route path="/login" element={<Login />} />
-            <Route path="/pricing" element={<Pricing />} />
-            <Route path="/update-password" element={<UpdatePassword />} />
-            
-            {/* Rutas Protegidas por Login */}
-            <Route 
-              path="/dashboard" 
-              element={
-                <ProtectedRoute>
-                  <DashboardLayout currentNiche={currentNiche} setCurrentNiche={setCurrentNiche} />
-                </ProtectedRoute>
-              }
-            >
-              <Route index element={<Dashboard />} />
-              <Route path="entities" element={<EntityList />} />
-              <Route path="calendar" element={<CalendarView />} />
-              <Route path="settings" element={<SettingsView />} />
-            </Route>
-            
-            {/* Fallback */}
-            <Route path="/" element={<Navigate to="/login" replace />} />
-            <Route path="*" element={<Navigate to="/login" replace />} />
-          </Routes>
-        </Suspense>
-      </BrowserRouter>
-    </AuthProvider>
+    <ToastProvider>
+      <AuthProvider>
+        <BrowserRouter>
+          <Suspense fallback={<PageLoader />}>
+            <Routes>
+              {/* Rutas Públicas */}
+              <Route path="/login" element={<Login />} />
+              <Route path="/pricing" element={<Pricing />} />
+              <Route path="/update-password" element={<UpdatePassword />} />
+              
+              {/* Rutas Protegidas por Login */}
+              <Route 
+                path="/dashboard" 
+                element={
+                  <ProtectedRoute>
+                    <DashboardLayout currentNiche={currentNiche} setCurrentNiche={setCurrentNiche} />
+                  </ProtectedRoute>
+                }
+              >
+                <Route index element={<Dashboard />} />
+                <Route path="entities" element={<EntityList />} />
+                <Route path="calendar" element={<CalendarView />} />
+                <Route path="settings" element={<SettingsView />} />
+              </Route>
+              
+              {/* Fallback */}
+              <Route path="/" element={<Navigate to="/login" replace />} />
+              <Route path="*" element={<Navigate to="/login" replace />} />
+            </Routes>
+          </Suspense>
+        </BrowserRouter>
+      </AuthProvider>
+    </ToastProvider>
   );
 }
 
