@@ -1,0 +1,169 @@
+import React, { useState, useEffect } from 'react';
+import { useOutletContext } from 'react-router-dom';
+import { CalendarCheck, Plus, X, Clock, Loader } from 'lucide-react';
+import { supabase } from '../lib/supabase';
+import { useAuth } from '../context/AuthContext';
+
+const DAYS = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'];
+const HOURS = ['08:00', '09:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00', '17:00', '18:00'];
+
+function NewAppointmentModal({ dayIndex, config, onClose, onSave }) {
+  const [form, setForm] = useState({ name: '', detail: '', time: '09:00' });
+  const [saving, setSaving] = useState(false);
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setSaving(true);
+    await onSave({ ...form, day: dayIndex });
+    setSaving(false);
+    onClose();
+  };
+  const inputStyle = { width: '100%', padding: '0.75rem 1rem', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.1)', background: 'rgba(0,0,0,0.25)', color: 'white', outline: 'none', fontFamily: 'inherit', boxSizing: 'border-box' };
+  return (
+    <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.7)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, backdropFilter: 'blur(4px)' }} onClick={onClose}>
+      <div style={{ background: '#1e293b', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '20px', padding: '2.5rem', width: '420px', position: 'relative' }} onClick={e => e.stopPropagation()}>
+        <button onClick={onClose} style={{ position: 'absolute', top: '1.2rem', right: '1.2rem', background: 'rgba(255,255,255,0.05)', border: 'none', color: 'white', cursor: 'pointer', borderRadius: '8px', padding: '6px', display: 'flex' }}><X size={18} /></button>
+        <h2 style={{ marginBottom: '1.5rem' }}>Nueva {config.labels.appointments.replace(/s$/, '')}</h2>
+        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+          <div><label style={{ display: 'block', marginBottom: '6px', color: 'rgba(255,255,255,0.7)', fontSize: '0.85rem' }}>Nombre *</label><input required placeholder="Ej. María García" value={form.name} onChange={e => setForm({...form, name: e.target.value})} style={inputStyle} /></div>
+          <div><label style={{ display: 'block', marginBottom: '6px', color: 'rgba(255,255,255,0.7)', fontSize: '0.85rem' }}>Hora *</label>
+            <select required value={form.time} onChange={e => setForm({...form, time: e.target.value})} style={{...inputStyle, cursor: 'pointer'}}>
+              {HOURS.map(h => <option key={h} value={h} style={{ background: '#1e293b' }}>{h}</option>)}
+            </select>
+          </div>
+          <div><label style={{ display: 'block', marginBottom: '6px', color: 'rgba(255,255,255,0.7)', fontSize: '0.85rem' }}>Motivo / Servicio</label><input placeholder="Ej. Primera consulta" value={form.detail} onChange={e => setForm({...form, detail: e.target.value})} style={inputStyle} /></div>
+          <button type="submit" disabled={saving} style={{ marginTop: '0.5rem', padding: '0.9rem', borderRadius: '10px', border: 'none', background: 'linear-gradient(135deg, var(--accent-cyan), var(--accent-purple))', color: '#0f172a', fontWeight: 700, cursor: saving ? 'wait' : 'pointer', fontSize: '1rem' }}>
+            {saving ? '⏳ Guardando...' : 'Agendar'}
+          </button>
+        </form>
+      </div>
+    </div>
+  );
+}
+
+function CalendarView() {
+  const { config, currentNiche } = useOutletContext();
+  const { user } = useAuth();
+  const [appointments, setAppointments] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [selectedDay, setSelectedDay] = useState(0);
+  const [showNew, setShowNew] = useState(false);
+
+  const fetchAppointments = async () => {
+    setLoading(true);
+    const { data, error } = await supabase
+      .from('appointments')
+      .select('*')
+      .eq('user_id', user.id)
+      .eq('niche', currentNiche)
+      .order('time', { ascending: true });
+    if (!error) setAppointments(data || []);
+    setLoading(false);
+  };
+
+  useEffect(() => { fetchAppointments(); }, [currentNiche]);
+
+  const handleSave = async ({ name, detail, time, day }) => {
+    const { error } = await supabase.from('appointments').insert([{
+      user_id: user.id, niche: currentNiche,
+      name, detail, time, day, status: 'confirmed'
+    }]);
+    if (!error) fetchAppointments();
+  };
+
+  const dayAppointments = appointments.filter(a => a.day === selectedDay);
+
+  return (
+    <>
+      {showNew && <NewAppointmentModal dayIndex={selectedDay} config={config} onClose={() => setShowNew(false)} onSave={handleSave} />}
+
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 340px', gap: '1.5rem' }}>
+        {/* Calendario de semana */}
+        <div className="glass-panel">
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.5rem' }}>
+            <h2 style={{ margin: 0 }}><CalendarCheck size={22} color="var(--accent-purple)" /> {config.labels.agendaT}</h2>
+            <span style={{ color: 'rgba(255,255,255,0.5)', fontSize: '0.9rem' }}>Semana del 7–13 Abr, 2025</span>
+          </div>
+
+          {/* Selector de días */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '8px', marginBottom: '1rem' }}>
+            {DAYS.map((day, i) => (
+              <button key={day} onClick={() => setSelectedDay(i)} style={{
+                padding: '12px 8px', border: 'none', borderRadius: '12px', cursor: 'pointer', textAlign: 'center', transition: 'all 0.2s',
+                background: selectedDay === i ? 'var(--accent-cyan)' : 'rgba(255,255,255,0.04)',
+                color: selectedDay === i ? '#0f172a' : 'rgba(255,255,255,0.7)',
+                fontWeight: selectedDay === i ? 700 : 400, fontFamily: 'inherit'
+              }}>
+                <div style={{ fontSize: '0.75rem', marginBottom: '4px' }}>{day}</div>
+                <div style={{ fontSize: '1.1rem', fontWeight: 700 }}>{7 + i}</div>
+                {appointments.filter(a => a.day === i).length > 0 && (
+                  <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: selectedDay === i ? '#0f172a' : 'var(--accent-cyan)', margin: '4px auto 0' }} />
+                )}
+              </button>
+            ))}
+          </div>
+
+          {/* Bloques horarios */}
+          {loading ? (
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '200px', gap: '12px', color: 'rgba(255,255,255,0.4)' }}>
+              <Loader size={20} style={{ animation: 'spin 1s linear infinite' }} /> Cargando citas...
+            </div>
+          ) : (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+              {HOURS.map(hour => {
+                const appt = dayAppointments.find(a => a.time === hour);
+                return (
+                  <div key={hour} style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '10px 12px', borderRadius: '10px', minHeight: '52px', background: appt ? 'rgba(99,102,241,0.1)' : 'rgba(255,255,255,0.02)', border: appt ? '1px solid rgba(99,102,241,0.3)' : '1px solid transparent', cursor: 'pointer', transition: 'all 0.2s' }}
+                    onMouseEnter={e => !appt && (e.currentTarget.style.background = 'rgba(255,255,255,0.04)')}
+                    onMouseLeave={e => !appt && (e.currentTarget.style.background = 'rgba(255,255,255,0.02)')}
+                    onClick={() => !appt && setShowNew(true)}>
+                    <span style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.35)', width: '45px', flexShrink: 0 }}>{hour}</span>
+                    {appt ? (
+                      <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                        <div>
+                          <p style={{ margin: 0, fontWeight: 600, fontSize: '0.9rem' }}>{appt.name}</p>
+                          <p style={{ margin: 0, fontSize: '0.78rem', color: 'rgba(255,255,255,0.5)' }}>{appt.detail}</p>
+                        </div>
+                        <span style={{ padding: '3px 10px', borderRadius: '20px', fontSize: '0.75rem', fontWeight: 600, background: appt.status === 'confirmed' ? 'rgba(16,185,129,0.15)' : 'rgba(245,158,11,0.15)', color: appt.status === 'confirmed' ? '#10b981' : '#f59e0b' }}>
+                          {appt.status === 'confirmed' ? 'Confirmado' : 'Pendiente'}
+                        </span>
+                      </div>
+                    ) : (
+                      <span style={{ color: 'rgba(255,255,255,0.15)', fontSize: '0.82rem' }}>— clic para agendar</span>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
+
+        {/* Panel lateral */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+          <div className="glass-panel">
+            <h3 style={{ marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '1rem' }}>
+              <Clock size={18} color="var(--accent-cyan)" /> {DAYS[selectedDay]} 7 Abril
+            </h3>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+              {loading ? (
+                <p style={{ color: 'rgba(255,255,255,0.3)', fontSize: '0.85rem', textAlign: 'center', padding: '1rem 0' }}>Cargando...</p>
+              ) : dayAppointments.length === 0 ? (
+                <p style={{ color: 'rgba(255,255,255,0.3)', fontSize: '0.85rem', textAlign: 'center', padding: '1rem 0' }}>Sin citas agendadas</p>
+              ) : dayAppointments.map(a => (
+                <div key={a.id} style={{ background: 'rgba(255,255,255,0.04)', borderRadius: '10px', padding: '0.75rem' }}>
+                  <p style={{ margin: '0 0 2px', fontWeight: 600, fontSize: '0.9rem' }}>{a.name}</p>
+                  <p style={{ margin: 0, fontSize: '0.78rem', color: 'var(--accent-cyan)' }}>{a.time} — {a.detail}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+          <button onClick={() => setShowNew(true)} className="btn-primary" style={{ width: '100%', justifyContent: 'center', padding: '1rem' }}>
+            <Plus size={18} /> Nueva {config.labels.appointments.replace(/s$/, '')}
+          </button>
+        </div>
+      </div>
+      <style>{`@keyframes spin { from { transform: rotate(0deg) } to { transform: rotate(360deg) } }`}</style>
+    </>
+  );
+}
+
+export default CalendarView;
