@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useOutletContext } from 'react-router-dom';
-import { Users, Search, Plus, X, Phone, Mail, Calendar, ChevronRight, Loader, Lock } from 'lucide-react';
+import { Users, Search, Plus, X, Phone, Mail, Calendar, ChevronRight, Edit2, Trash2, Lock } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../context/AuthContext';
+import { useToast } from '../context/ToastContext';
 import PaywallModal from '../components/PaywallModal';
 
 const FREE_PLAN_LIMIT = 3; // Máximo de registros en plan gratuito
@@ -13,25 +14,56 @@ const statusConfig = {
   inactive: { label: 'Inactivo', color: '#6b7280', bg: 'rgba(107,114,128,0.15)' },
 };
 
-function ProfileModal({ entity, config, onClose }) {
+function ProfileModal({ entity, config, onClose, onDelete, onUpdate }) {
   const s = statusConfig[entity.status] || statusConfig.active;
+  const [editing, setEditing] = useState(false);
+  const [form, setForm] = useState(entity);
+  const toast = useToast();
+
+  const handleUpdate = async (e) => {
+    e.preventDefault();
+    await onUpdate(entity.id, form);
+    setEditing(false);
+  };
+
+  const inputStyle = { width: '100%', padding: '0.6rem 0.8rem', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.1)', background: 'rgba(0,0,0,0.2)', color: 'white', outline: 'none', fontFamily: 'inherit', boxSizing: 'border-box' };
+
   return (
     <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.7)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, backdropFilter: 'blur(4px)' }} onClick={onClose}>
       <div style={{ background: '#1e293b', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '20px', padding: '2.5rem', width: '440px', position: 'relative' }} onClick={e => e.stopPropagation()}>
-        <button onClick={onClose} style={{ position: 'absolute', top: '1.2rem', right: '1.2rem', background: 'rgba(255,255,255,0.05)', border: 'none', color: 'white', cursor: 'pointer', borderRadius: '8px', padding: '6px', display: 'flex' }}><X size={18} /></button>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '1.2rem', marginBottom: '2rem' }}>
-          <div style={{ width: 64, height: 64, borderRadius: '50%', background: 'linear-gradient(135deg, var(--accent-cyan), var(--accent-purple))', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.4rem', fontWeight: 700, color: '#0f172a', flexShrink: 0 }}>{entity.avatar}</div>
-          <div>
-            <h2 style={{ margin: 0, fontSize: '1.3rem' }}>{entity.name}</h2>
-            <span style={{ background: s.bg, color: s.color, padding: '3px 10px', borderRadius: '20px', fontSize: '0.78rem', fontWeight: 600 }}>{s.label}</span>
-          </div>
+        <div style={{ position: 'absolute', top: '1.2rem', right: '1.2rem', display: 'flex', gap: '8px' }}>
+          {!editing && <button onClick={() => setEditing(true)} style={{ background: 'rgba(99,102,241,0.15)', color: '#a5b4fc', border: 'none', cursor: 'pointer', borderRadius: '8px', padding: '6px' }}><Edit2 size={16} /></button>}
+          {editing && <button onClick={() => setEditing(false)} style={{ background: 'rgba(255,255,255,0.1)', color: 'white', border: 'none', cursor: 'pointer', borderRadius: '8px', padding: '6px' }}>Cancelar</button>}
+          <button onClick={() => { if(window.confirm('¿Seguro que deseas borrar este registro?')) onDelete(entity.id); }} style={{ background: 'rgba(239,68,68,0.15)', color: '#fca5a5', border: 'none', cursor: 'pointer', borderRadius: '8px', padding: '6px' }}><Trash2 size={16} /></button>
+          <button onClick={onClose} style={{ background: 'rgba(255,255,255,0.05)', border: 'none', color: 'white', cursor: 'pointer', borderRadius: '8px', padding: '6px' }}><X size={16} /></button>
         </div>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem', color: 'rgba(255,255,255,0.7)' }}><Mail size={16} color="var(--accent-cyan)" /> {entity.email || 'Sin correo'}</div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem', color: 'rgba(255,255,255,0.7)' }}><Phone size={16} color="var(--accent-cyan)" /> {entity.phone || 'Sin teléfono'}</div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem', color: 'rgba(255,255,255,0.7)' }}><Calendar size={16} color="var(--accent-cyan)" /> Registro: {entity.created_at?.split('T')[0] || entity.date || '-'}</div>
-          {entity.detail && <div style={{ background: 'rgba(255,255,255,0.05)', borderRadius: '10px', padding: '1rem', marginTop: '0.5rem' }}><p style={{ margin: 0, fontSize: '0.85rem', color: 'rgba(255,255,255,0.5)', marginBottom: '4px' }}>Servicio / Tratamiento</p><p style={{ margin: 0, fontWeight: 600 }}>{entity.detail}</p></div>}
-        </div>
+
+        {editing ? (
+          <form onSubmit={handleUpdate} style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginTop: '1rem' }}>
+            <h3 style={{ margin: '0 0 0.5rem' }}>Editar Registro</h3>
+            <input value={form.name} onChange={e => setForm({...form, name: e.target.value})} placeholder="Nombre completo" required style={inputStyle} />
+            <input type="email" value={form.email} onChange={e => setForm({...form, email: e.target.value})} placeholder="Correo electrónico" style={inputStyle} />
+            <input value={form.phone} onChange={e => setForm({...form, phone: e.target.value})} placeholder="Teléfono" style={inputStyle} />
+            <input value={form.detail} onChange={e => setForm({...form, detail: e.target.value})} placeholder="Motivo / Servicio" style={inputStyle} />
+            <button type="submit" className="btn-primary" style={{ padding: '0.8rem', justifyContent: 'center' }}>Guardar Cambios</button>
+          </form>
+        ) : (
+          <>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '1.2rem', marginBottom: '2rem' }}>
+              <div style={{ width: 64, height: 64, borderRadius: '50%', background: 'linear-gradient(135deg, var(--accent-cyan), var(--accent-purple))', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.4rem', fontWeight: 700, color: '#0f172a', flexShrink: 0 }}>{entity.avatar}</div>
+              <div>
+                <h2 style={{ margin: 0, fontSize: '1.3rem' }}>{entity.name}</h2>
+                <span style={{ background: s.bg, color: s.color, padding: '3px 10px', borderRadius: '20px', fontSize: '0.78rem', fontWeight: 600 }}>{s.label}</span>
+              </div>
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem', color: 'rgba(255,255,255,0.7)' }}><Mail size={16} color="var(--accent-cyan)" /> {entity.email || 'Sin correo'}</div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem', color: 'rgba(255,255,255,0.7)' }}><Phone size={16} color="var(--accent-cyan)" /> {entity.phone || 'Sin teléfono'}</div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem', color: 'rgba(255,255,255,0.7)' }}><Calendar size={16} color="var(--accent-cyan)" /> Registro: {entity.created_at?.split('T')[0] || entity.date || '-'}</div>
+              {entity.detail && <div style={{ background: 'rgba(255,255,255,0.05)', borderRadius: '10px', padding: '1rem', marginTop: '0.5rem' }}><p style={{ margin: 0, fontSize: '0.85rem', color: 'rgba(255,255,255,0.5)', marginBottom: '4px' }}>Servicio / Tratamiento</p><p style={{ margin: 0, fontWeight: 600 }}>{entity.detail}</p></div>}
+            </div>
+          </>
+        )}
       </div>
     </div>
   );
@@ -70,6 +102,7 @@ function NewEntityModal({ config, onClose, onSave }) {
 function EntityList() {
   const { config, currentNiche } = useOutletContext();
   const { user } = useAuth();
+  const toast = useToast();
   const [search, setSearch] = useState('');
   const [entities, setEntities] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -106,7 +139,35 @@ function EntityList() {
       name: form.name, email: form.email, phone: form.phone,
       detail: form.detail, status: 'active'
     }]);
-    if (!error) fetchEntities();
+    if (!error) {
+      toast.success('Registro añadido');
+      fetchEntities();
+    } else {
+      toast.error('Error al agregar');
+    }
+  };
+
+  const handleDelete = async (id) => {
+    const { error } = await supabase.from('entities').delete().eq('id', id);
+    if (!error) {
+      toast.success('Eliminado de forma permanente');
+      setSelected(null);
+      fetchEntities();
+    }
+  };
+
+  const handleUpdate = async (id, newForm) => {
+    const avatar = newForm.name.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase();
+    const { error } = await supabase.from('entities').update({
+      name: newForm.name, email: newForm.email, phone: newForm.phone, detail: newForm.detail, avatar
+    }).eq('id', id);
+    if (!error) {
+      toast.success('Actualizado correctamente');
+      setSelected({ ...selected, ...newForm, avatar });
+      fetchEntities();
+    } else {
+      toast.error('Ocurrió un error al actualizar');
+    }
   };
 
   const filtered = entities.filter(e =>
@@ -116,7 +177,7 @@ function EntityList() {
 
   return (
     <>
-      {selected && <ProfileModal entity={selected} config={config} onClose={() => setSelected(null)} />}
+      {selected && <ProfileModal entity={selected} config={config} onClose={() => setSelected(null)} onDelete={handleDelete} onUpdate={handleUpdate} />}
       {showNew && <NewEntityModal config={config} onClose={() => setShowNew(false)} onSave={handleSave} />}
       {showPaywall && <PaywallModal onClose={() => setShowPaywall(false)} limitType="entities" />}
 
@@ -135,8 +196,10 @@ function EntityList() {
         </div>
 
         {loading ? (
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '200px', gap: '12px', color: 'rgba(255,255,255,0.4)' }}>
-            <Loader size={20} style={{ animation: 'spin 1s linear infinite' }} /> Cargando desde la nube...
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginTop: '1rem' }}>
+            {[1,2,3,4].map(idx => (
+              <div key={idx} style={{ height: '60px', background: 'rgba(255,255,255,0.03)', borderRadius: '10px', animation: 'pulse 1.5s infinite alternate' }} />
+            ))}
           </div>
         ) : (
           <>
@@ -191,7 +254,10 @@ function EntityList() {
           </>
         )}
       </div>
-      <style>{`@keyframes spin { from { transform: rotate(0deg) } to { transform: rotate(360deg) } }`}</style>
+      <style>{`
+        @keyframes spin { from { transform: rotate(0deg) } to { transform: rotate(360deg) } }
+        @keyframes pulse { from { opacity: 0.3 } to { opacity: 0.7 } }
+      `}</style>
     </>
   );
 }

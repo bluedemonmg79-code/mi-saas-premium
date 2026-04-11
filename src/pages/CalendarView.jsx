@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useOutletContext } from 'react-router-dom';
-import { CalendarCheck, Plus, X, Clock, Loader } from 'lucide-react';
+import { CalendarCheck, Plus, X, Clock, Loader, Trash2, Edit2 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../context/AuthContext';
+import { useToast } from '../context/ToastContext';
 
 const DAYS = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'];
 const HOURS = ['08:00', '09:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00', '17:00', '18:00'];
@@ -43,10 +44,12 @@ function NewAppointmentModal({ dayIndex, config, onClose, onSave }) {
 function CalendarView() {
   const { config, currentNiche } = useOutletContext();
   const { user } = useAuth();
+  const toast = useToast();
   const [appointments, setAppointments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedDay, setSelectedDay] = useState(0);
   const [showNew, setShowNew] = useState(false);
+  const [showEdit, setShowEdit] = useState(null);
 
   const fetchAppointments = async () => {
     setLoading(true);
@@ -67,7 +70,29 @@ function CalendarView() {
       user_id: user.id, niche: currentNiche,
       name, detail, time, day, status: 'confirmed'
     }]);
-    if (!error) fetchAppointments();
+    if (!error) {
+      toast.success('Cita agendada correctamente');
+      fetchAppointments();
+    } else {
+      toast.error('Error agendando cita');
+    }
+  };
+
+  const handleUpdate = async (id, form) => {
+    const { error } = await supabase.from('appointments').update(form).eq('id', id);
+    if (!error) {
+      toast.success('Cita actualizada');
+      fetchAppointments();
+    }
+  };
+
+  const handleDelete = async (id) => {
+    if(!window.confirm('¿Eliminar cita de forma permanente?')) return;
+    const { error } = await supabase.from('appointments').delete().eq('id', id);
+    if (!error) {
+      toast.success('Cita eliminada');
+      fetchAppointments();
+    }
   };
 
   const dayAppointments = appointments.filter(a => a.day === selectedDay);
@@ -75,6 +100,24 @@ function CalendarView() {
   return (
     <>
       {showNew && <NewAppointmentModal dayIndex={selectedDay} config={config} onClose={() => setShowNew(false)} onSave={handleSave} />}
+      {showEdit && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.7)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, backdropFilter: 'blur(4px)' }} onClick={() => setShowEdit(null)}>
+          <div style={{ background: '#1e293b', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '20px', padding: '2.5rem', width: '420px', position: 'relative' }} onClick={e => e.stopPropagation()}>
+            <button onClick={() => setShowEdit(null)} style={{ position: 'absolute', top: '1.2rem', right: '1.2rem', background: 'rgba(255,255,255,0.05)', border: 'none', color: 'white', cursor: 'pointer', borderRadius: '8px', padding: '6px', display: 'flex' }}><X size={18} /></button>
+            <h2 style={{ marginBottom: '0.5rem', marginTop: 0 }}>Gestionar Cita</h2>
+            <div style={{ background: 'rgba(255,255,255,0.05)', padding: '1rem', borderRadius: '10px', marginBottom: '1.5rem', marginTop: '1rem' }}>
+              <p style={{ margin: 0, fontWeight: 600, fontSize: '1.1rem' }}>{showEdit.name}</p>
+              <p style={{ margin: '4px 0 0', color: 'rgba(255,255,255,0.6)' }}>{showEdit.detail} — a las {showEdit.time}</p>
+            </div>
+            
+            <div style={{ display: 'flex', gap: '1rem' }}>
+              <button onClick={() => { handleDelete(showEdit.id); setShowEdit(null); }} style={{ flex: 1, padding: '0.9rem', borderRadius: '10px', border: 'none', background: 'rgba(239,68,68,0.15)', color: '#fca5a5', fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
+                <Trash2 size={16} /> Cancelar Cita
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 340px', gap: '1.5rem' }}>
         {/* Calendario de semana */}
@@ -104,8 +147,10 @@ function CalendarView() {
 
           {/* Bloques horarios */}
           {loading ? (
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '200px', gap: '12px', color: 'rgba(255,255,255,0.4)' }}>
-              <Loader size={20} style={{ animation: 'spin 1s linear infinite' }} /> Cargando citas...
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+              {[1,2,3,4,5].map(idx => (
+                <div key={idx} style={{ height: '52px', background: 'rgba(255,255,255,0.03)', borderRadius: '10px', animation: 'pulse 1.5s infinite alternate' }} />
+              ))}
             </div>
           ) : (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
@@ -115,7 +160,7 @@ function CalendarView() {
                   <div key={hour} style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '10px 12px', borderRadius: '10px', minHeight: '52px', background: appt ? 'rgba(99,102,241,0.1)' : 'rgba(255,255,255,0.02)', border: appt ? '1px solid rgba(99,102,241,0.3)' : '1px solid transparent', cursor: 'pointer', transition: 'all 0.2s' }}
                     onMouseEnter={e => !appt && (e.currentTarget.style.background = 'rgba(255,255,255,0.04)')}
                     onMouseLeave={e => !appt && (e.currentTarget.style.background = 'rgba(255,255,255,0.02)')}
-                    onClick={() => !appt && setShowNew(true)}>
+                    onClick={() => appt ? setShowEdit(appt) : setShowNew(true)}>
                     <span style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.35)', width: '45px', flexShrink: 0 }}>{hour}</span>
                     {appt ? (
                       <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
@@ -161,7 +206,10 @@ function CalendarView() {
           </button>
         </div>
       </div>
-      <style>{`@keyframes spin { from { transform: rotate(0deg) } to { transform: rotate(360deg) } }`}</style>
+      <style>{`
+        @keyframes spin { from { transform: rotate(0deg) } to { transform: rotate(360deg) } }
+        @keyframes pulse { from { opacity: 0.3 } to { opacity: 0.7 } }
+      `}</style>
     </>
   );
 }

@@ -1,26 +1,28 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { Lock, AlertCircle, CheckCircle } from 'lucide-react';
+import { useToast } from '../context/ToastContext';
+import { Lock } from 'lucide-react';
 
 function UpdatePassword() {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
-  const [success, setSuccess] = useState(false);
   const { updatePassword } = useAuth();
   const navigate = useNavigate();
+  const toast = useToast();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
-    setError('');
 
     try {
       await updatePassword(password);
-      setSuccess(true);
+      toast.success('Contraseña actualizada exitosamente. Redirigiendo...');
+      setTimeout(() => {
+        navigate('/');
+      }, 2000);
     } catch (err) {
-      setError(err.message || 'Error al actualizar contraseña.');
+      toast.error(err.message || 'Error al actualizar la contraseña.');
     } finally {
       setLoading(false);
     }

@@ -3,6 +3,7 @@ import { useOutletContext } from 'react-router-dom';
 import { Settings, Building, Phone, Mail, Globe, Save, Check, Upload, Loader } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../context/AuthContext';
+import { useToast } from '../context/ToastContext';
 
 function SettingsView() {
   const { config, currentNiche } = useOutletContext();
@@ -18,6 +19,7 @@ function SettingsView() {
   });
   const [uploading, setUploading] = useState(false);
   const { user } = useAuth();
+  const toast = useToast();
 
   useEffect(() => {
     // Al cargar la página, buscar si ya había guardado un perfil
@@ -62,10 +64,11 @@ function SettingsView() {
       
       // Update profile
       await supabase.from('profiles').upsert({ id: user.id, logo_url: data.publicUrl });
+      toast.success('Logo actualizado exitosamente');
       
     } catch (error) {
       console.error('Error subiendo logo:', error);
-      alert('Error subiendo logo: ' + error.message);
+      toast.error('Error al subir imagen: ' + error.message);
     } finally {
       setUploading(false);
     }
@@ -86,9 +89,10 @@ function SettingsView() {
       });
       if (error) throw error;
       setSaved(true);
+      toast.success('Configuración guardada en la nube');
       setTimeout(() => setSaved(false), 2500);
     } catch (error) {
-      alert('Error guardando configuración: ' + error.message);
+      toast.error('Error guardando configuración: ' + error.message);
     }
   };
 

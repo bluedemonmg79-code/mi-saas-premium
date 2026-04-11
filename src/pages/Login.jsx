@@ -1,33 +1,31 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { ShieldCheck, Rocket, UserPlus, AlertCircle } from 'lucide-react';
+import { useToast } from '../context/ToastContext';
+import { ShieldCheck, Rocket, UserPlus } from 'lucide-react';
 
 function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isRegister, setIsRegister] = useState(false);
   const [isForgot, setIsForgot] = useState(false);
-  const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const [successMsg, setSuccessMsg] = useState('');
   const { login, register, resetPassword } = useAuth();
   const navigate = useNavigate();
+  const toast = useToast();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError('');
-    setSuccessMsg('');
     setLoading(true);
 
     try {
       if (isForgot) {
         await resetPassword(email);
-        setSuccessMsg('Si el correo existe, te hemos enviado un enlace para restablecer tu contraseña.');
+        toast.success('Si el correo existe, te hemos enviado un enlace para restablecer tu contraseña.');
         setIsForgot(false);
       } else if (isRegister) {
         await register(email, password);
-        setSuccessMsg('¡Cuenta creada! Revisa tu correo para confirmar tu cuenta, luego inicia sesión.');
+        toast.success('¡Cuenta creada! Revisa tu correo para confirmar tu cuenta, luego inicia sesión.');
         setIsRegister(false);
       } else {
         await login(email, password);
@@ -40,7 +38,7 @@ function Login() {
         'User already registered': 'Este correo ya tiene una cuenta. Inicia sesión.',
         'Password should be at least 6 characters': 'La contraseña debe tener al menos 6 caracteres.',
       };
-      setError(messages[err.message] || err.message);
+      toast.error(messages[err.message] || err.message);
     } finally {
       setLoading(false);
     }
