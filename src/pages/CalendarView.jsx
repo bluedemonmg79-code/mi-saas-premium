@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useOutletContext } from 'react-router-dom';
-import { CalendarCheck, Plus, X, Clock, Loader, Trash2, Edit2 } from 'lucide-react';
+import { CalendarCheck, Plus, X, Clock, Loader, Trash2, Edit2, MessageCircle } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
@@ -97,6 +97,12 @@ function CalendarView() {
 
   const dayAppointments = appointments.filter(a => a.day === selectedDay);
 
+  const openWhatsApp = () => {
+    // In a real app we would have the entity's phone linked in the appointment, but for now we'll just open WhatsApp Web
+    const message = encodeURIComponent(`Hola ${showEdit.name}, le escribimos de ${config.appName} para recordarle su cita de ${showEdit.detail} a las ${showEdit.time}. ¡Saludos!`);
+    window.open(`https://wa.me/?text=${message}`, '_blank');
+  };
+
   return (
     <>
       {showNew && <NewAppointmentModal dayIndex={selectedDay} config={config} onClose={() => setShowNew(false)} onSave={handleSave} />}
@@ -110,8 +116,11 @@ function CalendarView() {
               <p style={{ margin: '4px 0 0', color: 'rgba(255,255,255,0.6)' }}>{showEdit.detail} — a las {showEdit.time}</p>
             </div>
             
-            <div style={{ display: 'flex', gap: '1rem' }}>
-              <button onClick={() => { handleDelete(showEdit.id); setShowEdit(null); }} style={{ flex: 1, padding: '0.9rem', borderRadius: '10px', border: 'none', background: 'rgba(239,68,68,0.15)', color: '#fca5a5', fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
+            <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
+              <button onClick={openWhatsApp} style={{ flex: '1 1 100%', padding: '0.9rem', borderRadius: '10px', border: 'none', background: 'linear-gradient(135deg, #10b981, #059669)', color: 'white', fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
+                <MessageCircle size={18} /> Enviar Recordatorio
+              </button>
+              <button onClick={() => { handleDelete(showEdit.id); setShowEdit(null); }} style={{ flex: '1 1 100%', padding: '0.9rem', borderRadius: '10px', border: 'none', background: 'rgba(239,68,68,0.15)', color: '#fca5a5', fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
                 <Trash2 size={16} /> Cancelar Cita
               </button>
             </div>

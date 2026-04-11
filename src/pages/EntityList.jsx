@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useOutletContext } from 'react-router-dom';
-import { Users, Search, Plus, X, Phone, Mail, Calendar, ChevronRight, Edit2, Trash2, Lock } from 'lucide-react';
+import { Users, Search, Plus, X, Phone, Mail, Calendar, ChevronRight, Edit2, Trash2, Lock, Download, MessageCircle } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
@@ -27,6 +27,16 @@ function ProfileModal({ entity, config, onClose, onDelete, onUpdate }) {
   };
 
   const inputStyle = { width: '100%', padding: '0.6rem 0.8rem', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.1)', background: 'rgba(0,0,0,0.2)', color: 'white', outline: 'none', fontFamily: 'inherit', boxSizing: 'border-box' };
+
+  const openWhatsApp = () => {
+    if (!entity.phone) {
+      toast.error('Este cliente no tiene teléfono guardado');
+      return;
+    }
+    const cleanPhone = entity.phone.replace(/\D/g, '');
+    const message = encodeURIComponent(`Hola ${entity.name}, le escribimos de ${config.appName}.`);
+    window.open(`https://wa.me/${cleanPhone}?text=${message}`, '_blank');
+  };
 
   return (
     <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.7)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, backdropFilter: 'blur(4px)' }} onClick={onClose}>
@@ -61,6 +71,10 @@ function ProfileModal({ entity, config, onClose, onDelete, onUpdate }) {
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem', color: 'rgba(255,255,255,0.7)' }}><Phone size={16} color="var(--accent-cyan)" /> {entity.phone || 'Sin teléfono'}</div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem', color: 'rgba(255,255,255,0.7)' }}><Calendar size={16} color="var(--accent-cyan)" /> Registro: {entity.created_at?.split('T')[0] || entity.date || '-'}</div>
               {entity.detail && <div style={{ background: 'rgba(255,255,255,0.05)', borderRadius: '10px', padding: '1rem', marginTop: '0.5rem' }}><p style={{ margin: 0, fontSize: '0.85rem', color: 'rgba(255,255,255,0.5)', marginBottom: '4px' }}>Servicio / Tratamiento</p><p style={{ margin: 0, fontWeight: 600 }}>{entity.detail}</p></div>}
+              
+              <button onClick={openWhatsApp} className="btn-primary" style={{ width: '100%', justifyContent: 'center', marginTop: '1rem', background: 'linear-gradient(135deg, #10b981, #059669)', color: 'white' }}>
+                <MessageCircle size={18} /> Contactar por WhatsApp
+              </button>
             </div>
           </>
         )}
@@ -175,6 +189,24 @@ function EntityList() {
     (e.email || '').toLowerCase().includes(search.toLowerCase())
   );
 
+  const exportToCSV = () => {
+    if (entities.length === 0) {
+      toast.error('No hay registros para exportar');
+      return;
+    }
+    const headers = ['Nombre,Correo,Telefono,Servicio,Estado,Fecha de Registro'];
+    const rows = entities.map(e => `"${e.name}","${e.email || ''}","${e.phone || ''}","${e.detail || ''}","${e.status}","${e.created_at?.split('T')[0]}"`);
+    const csvContent = "data:text/csv;charset=utf-8," + headers.concat(rows).join("\n");
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", `directorio_${config.appName.replace(/\s+/g, '_').toLowerCase()}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    toast.success('Descargando archivo CSV');
+  };
+
   return (
     <>
       {selected && <ProfileModal entity={selected} config={config} onClose={() => setSelected(null)} onDelete={handleDelete} onUpdate={handleUpdate} />}
@@ -182,13 +214,16 @@ function EntityList() {
       {showPaywall && <PaywallModal onClose={() => setShowPaywall(false)} limitType="entities" />}
 
       <div className="glass-panel" style={{ minHeight: '60vh' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '1rem' }}>
           <h2 style={{ margin: 0 }}><Users size={22} color="var(--accent-cyan)" /> Directorio de {config.labels.clients}</h2>
-          <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+          <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', flexWrap: 'wrap' }}>
             <div style={{ display: 'flex', alignItems: 'center', background: 'rgba(255,255,255,0.05)', padding: '0.5rem 1rem', borderRadius: '10px', border: '1px solid rgba(255,255,255,0.08)', gap: '8px' }}>
               <Search size={16} color="rgba(255,255,255,0.4)" />
               <input value={search} onChange={e => setSearch(e.target.value)} placeholder={`Buscar...`} style={{ background: 'transparent', border: 'none', color: 'white', outline: 'none', width: '180px', fontFamily: 'inherit' }} />
             </div>
+            <button onClick={exportToCSV} style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '0.65rem 1rem', borderRadius: '10px', border: '1px solid rgba(255,255,255,0.1)', background: 'rgba(255,255,255,0.05)', color: 'white', cursor: 'pointer', fontSize: '0.9rem', fontFamily: 'inherit' }}>
+              <Download size={16} /> Exportar CSV
+            </button>
             <button onClick={handleNewClick} className="btn-primary" style={{ margin: 0 }}>
               {entities.length >= FREE_PLAN_LIMIT ? <Lock size={16} /> : <Plus size={16} />} Nuevo
             </button>
