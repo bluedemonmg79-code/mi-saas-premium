@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useOutletContext, useSearchParams } from 'react-router-dom';
-import { CalendarCheck, Plus, X, Clock, Loader, Trash2, Edit2, MessageCircle } from 'lucide-react';
+import { CalendarCheck, Plus, X, Clock, Loader, Trash2, Edit2, MessageCircle, Globe, CheckCircle } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
@@ -164,6 +164,17 @@ function CalendarView() {
                   <button onClick={openWhatsApp} style={{ flex: '1 1 100%', padding: '0.8rem', borderRadius: '10px', border: 'none', background: 'linear-gradient(135deg, #10b981, #059669)', color: 'white', fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
                     <MessageCircle size={18} /> Recordatorio WhatsApp
                   </button>
+                  {showEdit.status === 'pending' && (
+                    <button 
+                      onClick={async () => {
+                        await handleUpdate(showEdit.id, { status: 'confirmed' });
+                        setShowEdit({ ...showEdit, status: 'confirmed' });
+                      }}
+                      style={{ flex: '1 1 100%', padding: '0.8rem', borderRadius: '10px', border: 'none', background: 'linear-gradient(135deg, #f59e0b, #d97706)', color: 'white', fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}
+                    >
+                      <CheckCircle size={18} /> Confirmar Cita ⚡
+                    </button>
+                  )}
                   <button onClick={() => { setEditForm({ name: showEdit.name, detail: showEdit.detail, notes: showEdit.notes || '', time: showEdit.time }); setIsEditing(true); }} style={{ flex: '1', padding: '0.8rem', borderRadius: '10px', border: '1px solid rgba(255,255,255,0.1)', background: 'rgba(255,255,255,0.05)', color: 'white', fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
                     <Edit2 size={16} /> Editar
                   </button>
@@ -221,9 +232,21 @@ function CalendarView() {
                     onClick={() => appt ? setShowEdit(appt) : setShowNew(true)}>
                     <span style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.35)', width: '45px', flexShrink: 0 }}>{hour}</span>
                     {appt ? (
-                      <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                      <div style={{ 
+                        flex: 1, 
+                        display: 'flex', 
+                        alignItems: 'center', 
+                        justifyContent: 'space-between',
+                        ...(appt.origin === 'web' && appt.status === 'pending' && {
+                          borderLeft: '3px solid #f59e0b',
+                          paddingLeft: '10px',
+                          marginLeft: '-10px'
+                        })
+                      }}>
                         <div>
-                          <p style={{ margin: 0, fontWeight: 600, fontSize: '0.9rem' }}>{appt.name}</p>
+                          <p style={{ margin: 0, fontWeight: 600, fontSize: '0.9rem', display: 'flex', alignItems: 'center', gap: '5px' }}>
+                            {appt.name} {appt.origin === 'web' && <Globe size={12} title="Desde Web" color="#f59e0b" />}
+                          </p>
                           <p style={{ margin: 0, fontSize: '0.78rem', color: 'rgba(255,255,255,0.5)' }}>{appt.detail}</p>
                         </div>
                         <span style={{ padding: '3px 10px', borderRadius: '20px', fontSize: '0.75rem', fontWeight: 600, background: appt.status === 'confirmed' ? 'rgba(16,185,129,0.15)' : 'rgba(245,158,11,0.15)', color: appt.status === 'confirmed' ? '#10b981' : '#f59e0b' }}>

@@ -14,6 +14,7 @@ const SettingsView = lazy(() => import('./pages/SettingsView'));
 const Login       = lazy(() => import('./pages/Login'));
 const Pricing     = lazy(() => import('./pages/Pricing'));
 const UpdatePassword = lazy(() => import('./pages/UpdatePassword'));
+const PublicBooking = lazy(() => import('./pages/PublicBooking'));
 
 const PageLoader = () => (
   <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#0f172a', color: 'rgba(255,255,255,0.4)', gap: '12px' }}>
@@ -36,6 +37,7 @@ function App() {
               <Route path="/login" element={<Login />} />
               <Route path="/pricing" element={<Pricing />} />
               <Route path="/update-password" element={<UpdatePassword />} />
+              <Route path="/u/:username" element={<PublicBooking />} />
               
               {/* Rutas Protegidas por Login */}
               <Route 

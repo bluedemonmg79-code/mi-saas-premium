@@ -16,7 +16,9 @@ function SettingsView() {
     phone: '',
     address: '',
     website: '',
-    logoUrl: null
+    logoUrl: null,
+    username: '',
+    publicBookingEnabled: false
   });
   const [uploading, setUploading] = useState(false);
   const { user } = useAuth();
@@ -36,7 +38,9 @@ function SettingsView() {
           phone: data.phone || '',
           address: data.address || '',
           website: data.website || '',
-          logoUrl: data.logo_url || prev.logoUrl
+          logoUrl: data.logo_url || prev.logoUrl,
+          username: data.username || '',
+          publicBookingEnabled: data.public_booking_enabled || false
         }));
       }
     };
@@ -86,9 +90,17 @@ function SettingsView() {
         phone: form.phone,
         address: form.address,
         website: form.website,
-        logo_url: form.logoUrl
+        logo_url: form.logoUrl,
+        username: form.username.toLowerCase().replace(/\s+/g, '-'),
+        public_booking_enabled: form.publicBookingEnabled,
+        niche: currentNiche
       });
-      if (error) throw error;
+      if (error) {
+        if (error.code === '23505') {
+          throw new Error('Este nombre de usuario ya está ocupado. Elige otro.');
+        }
+        throw error;
+      }
       setSaved(true);
       toast.success('Configuración guardada en la nube');
       setTimeout(() => setSaved(false), 2500);
@@ -144,6 +156,58 @@ function SettingsView() {
             {saved ? <><Check size={18} /> Guardado</> : <><Save size={18} /> Guardar Cambios</>}
           </button>
         </form>
+
+        {/* Nueva Sección: Presencia Web */}
+        <div style={{ marginTop: '2.5rem', paddingTop: '2rem', borderTop: '1px solid rgba(255,255,255,0.08)' }}>
+          <h3 style={{ marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <Globe size={20} color="var(--accent-cyan)" /> Presencia Web ProNexusGlobal
+          </h3>
+          <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: '0.9rem', marginBottom: '1.5rem' }}>
+            Personaliza tu link único para que tus clientes puedan agendarse de forma autónoma.
+          </p>
+          
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '1.2rem' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', background: 'rgba(255,255,255,0.03)', padding: '1rem', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.05)' }}>
+              <div style={{ flex: 1 }}>
+                <label style={{ display: 'block', marginBottom: '4px', fontSize: '0.75rem', color: 'var(--accent-cyan)', fontWeight: 600 }}>URL DE AGENDAMIENTO</label>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '4px', color: 'white', fontSize: '0.9rem' }}>
+                  <span style={{ opacity: 0.4 }}>pronexus.app/u/</span>
+                  <input 
+                    value={form.username} 
+                    onChange={e => setForm({...form, username: e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, '')})}
+                    placeholder="tu-nombre" 
+                    style={{ ...inputStyle, width: 'auto', padding: '0px', background: 'transparent', border: 'none', borderBottom: '1px solid rgba(255,255,255,0.2)', borderRadius: 0 }} 
+                  />
+                </div>
+              </div>
+              <button 
+                onClick={() => {
+                  const url = `${window.location.origin}/u/${form.username}`;
+                  navigator.clipboard.writeText(url);
+                  toast.success('¡Link copiado al portapapeles!');
+                }}
+                disabled={!form.username}
+                className="btn-primary" 
+                style={{ padding: '0.6rem 1rem', fontSize: '0.85rem', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)' }}
+              >
+                <ExternalLink size={16} /> Copiar Link
+              </button>
+            </div>
+
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0.5rem 0' }}>
+              <div>
+                <h4 style={{ margin: 0, fontSize: '1rem' }}>Estado de la Web Pública</h4>
+                <p style={{ margin: 0, fontSize: '0.85rem', color: 'rgba(255,255,255,0.5)' }}>Permitir que clientes agenden sin login</p>
+              </div>
+              <div 
+                onClick={() => setForm({...form, publicBookingEnabled: !form.publicBookingEnabled})}
+                style={{ width: '50px', height: '26px', background: form.publicBookingEnabled ? 'var(--accent-cyan)' : 'rgba(255,255,255,0.1)', borderRadius: '20px', position: 'relative', cursor: 'pointer', transition: 'background 0.3s' }}
+              >
+                <div style={{ position: 'absolute', top: '3px', left: form.publicBookingEnabled ? '27px' : '3px', width: '20px', height: '20px', background: 'white', borderRadius: '50%', transition: 'left 0.3s' }} />
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
 
       {/* Panel info del nicho */}
