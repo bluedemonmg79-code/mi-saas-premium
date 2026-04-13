@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Outlet, NavLink, useNavigate } from 'react-router-dom';
 import { 
   LayoutDashboard, Users, CalendarCheck, Settings, 
-  Activity, Dumbbell, Scale, Building, Plus, LogOut
+  Activity, Dumbbell, Scale, Building, Plus, LogOut, HeartPulse
 } from 'lucide-react';
 import { NICHES } from '../config/nicheConfig';
 import { useAuth } from '../context/AuthContext';
@@ -13,15 +13,28 @@ function DashboardLayout({ currentNiche, setCurrentNiche }) {
   const { logout, user } = useAuth();
   const navigate = useNavigate();
   const [logoUrl, setLogoUrl] = useState(null);
+  const [userProfile, setUserProfile] = useState(null);
+  const isPremium = userProfile?.subscription_status === 'active';
 
   useEffect(() => {
     const fetchProfile = async () => {
       if (!user) return;
-      const { data } = await supabase.from('profiles').select('logo_url').eq('id', user.id).single();
-      if (data && data.logo_url) setLogoUrl(data.logo_url);
+      const { data } = await supabase.from('profiles').select('*').eq('id', user.id).single();
+      if (data) {
+        setUserProfile(data);
+        if (data.logo_url) setLogoUrl(data.logo_url);
+      }
     };
     fetchProfile();
   }, [user]);
+
+  const handleNewAction = () => {
+    if (currentNiche === 'health' || currentNiche === 'medicine') {
+      navigate('/dashboard/calendar?add=true');
+    } else {
+      navigate('/dashboard/entities?add=true');
+    }
+  };
 
   // Variables inyectadas de UI
   const themeStyles = {
@@ -32,6 +45,7 @@ function DashboardLayout({ currentNiche, setCurrentNiche }) {
   const getLogoIcon = () => {
     if (logoUrl) return <img src={logoUrl} alt="Logo" style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '8px' }} />;
     if (currentNiche === 'health') return <Activity />;
+    if (currentNiche === 'medicine') return <HeartPulse />;
     if (currentNiche === 'legal') return <Scale />;
     if (currentNiche === 'fitness') return <Dumbbell />;
     if (currentNiche === 'realestate') return <Building />;
@@ -76,20 +90,20 @@ function DashboardLayout({ currentNiche, setCurrentNiche }) {
         </nav>
         
         <div style={{ padding: '1rem', marginTop: 'auto', display: 'flex', flexDirection: 'column', gap: '8px', borderTop: '1px solid rgba(255,255,255,0.1)' }}>
-          <button
-            onClick={() => navigate('/pricing')}
-            style={{
-              width: '100%', padding: '0.8rem', cursor: 'pointer', borderRadius: '10px',
-              border: '1px solid rgba(99,102,241,0.4)', fontFamily: 'inherit', fontWeight: 600, fontSize: '0.85rem',
-              background: 'linear-gradient(135deg, rgba(99,102,241,0.15), rgba(168,85,247,0.1))',
-              color: '#a5b4fc', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
-              transition: 'all 0.2s'
-            }}
-            onMouseEnter={e => e.currentTarget.style.background = 'linear-gradient(135deg, rgba(99,102,241,0.3), rgba(168,85,247,0.2))'}
-            onMouseLeave={e => e.currentTarget.style.background = 'linear-gradient(135deg, rgba(99,102,241,0.15), rgba(168,85,247,0.1))'}
-          >
-            ✦ Mejorar Plan
-          </button>
+            <button
+              onClick={() => isPremium ? navigate('/dashboard/settings') : navigate('/pricing')}
+              style={{
+                width: '100%', padding: '0.8rem', cursor: 'pointer', borderRadius: '10px',
+                border: isPremium ? '1px solid rgba(16,185,129,0.2)' : '1px solid rgba(99,102,241,0.4)', fontFamily: 'inherit', fontWeight: 600, fontSize: '0.85rem',
+                background: isPremium ? 'linear-gradient(135deg, rgba(16,185,129,0.1), rgba(16,185,129,0.05))' : 'linear-gradient(135deg, rgba(99,102,241,0.15), rgba(168,85,247,0.1))',
+                color: isPremium ? '#10b981' : '#a5b4fc', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
+                transition: 'all 0.2s'
+              }}
+              onMouseEnter={e => e.currentTarget.style.background = isPremium ? 'linear-gradient(135deg, rgba(16,185,129,0.2), rgba(16,185,129,0.1))' : 'linear-gradient(135deg, rgba(99,102,241,0.3), rgba(168,85,247,0.2))'}
+              onMouseLeave={e => e.currentTarget.style.background = isPremium ? 'linear-gradient(135deg, rgba(16,185,129,0.1), rgba(16,185,129,0.05))' : 'linear-gradient(135deg, rgba(99,102,241,0.15), rgba(168,85,247,0.1))'}
+            >
+              {isPremium ? '✦ Suscripción Activa' : '✦ Mejorar Plan'}
+            </button>
           <button 
             onClick={logout}
             style={{ 
@@ -122,13 +136,14 @@ function DashboardLayout({ currentNiche, setCurrentNiche }) {
                 className="niche-dropdown"
               >
                 <option value="health">Modo Dentista</option>
+                <option value="medicine">Modo Medicina General</option>
                 <option value="legal">Modo Abogado</option>
                 <option value="fitness">Modo Gimnasio</option>
                 <option value="realestate">Modo Arquitecto</option>
               </select>
             </div>
 
-            <button className="btn-primary">
+            <button onClick={handleNewAction} className="btn-primary">
               <Plus size={18} /> {config.labels.newAction}
             </button>
           </div>
@@ -136,7 +151,7 @@ function DashboardLayout({ currentNiche, setCurrentNiche }) {
 
         {/* CONTENIDO VARIABLE (PÁGINAS) */}
         <div className="page-content-wrapper" style={{ marginTop: '2rem' }}>
-          <Outlet context={{ currentNiche, config }} />
+          <Outlet context={{ currentNiche, config, userProfile }} />
         </div>
       </main>
     </div>

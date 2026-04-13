@@ -6,7 +6,8 @@ import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
 
 function SettingsView() {
-  const { config, currentNiche } = useOutletContext();
+  const { config, currentNiche, userProfile } = useOutletContext();
+  const isPremium = userProfile?.subscription_status === 'active';
   const [saved, setSaved] = useState(false);
   const [form, setForm] = useState({
     businessName: config.appName,
@@ -166,12 +167,16 @@ function SettingsView() {
           </div>
           <p style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.4)', marginTop: '-0.5rem', marginBottom: '1.5rem' }}>PNG o JPG (máx. 2MB)</p>
 
-          <h3 style={{ margin: '0 0 0.5rem' }}>{config.appName}</h3>
-          <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: '0.85rem', margin: 0 }}>Plan Profesional</p>
+          <h3 style={{ margin: '0 0 0.5rem' }}>{form.businessName || config.appName}</h3>
+          <p style={{ color: isPremium ? '#10b981' : 'rgba(255,255,255,0.5)', fontSize: '0.85rem', margin: 0, fontWeight: isPremium ? 700 : 400 }}>
+            {isPremium ? '✦ Plan Ilimitado' : 'Plan Básico (Gratis)'}
+          </p>
           <div style={{ margin: '1.2rem 0', borderTop: '1px solid rgba(255,255,255,0.08)', paddingTop: '1.2rem' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.6rem' }}>
               <span style={{ color: 'rgba(255,255,255,0.5)', fontSize: '0.85rem' }}>{config.labels.clients}</span>
-              <span style={{ fontWeight: 600 }}>Ilimitados</span>
+              <span style={{ fontWeight: 600, color: isPremium ? '#10b981' : 'white' }}>
+                {isPremium ? 'Ilimitados' : 'Límite de 3'}
+              </span>
             </div>
             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.6rem' }}>
               <span style={{ color: 'rgba(255,255,255,0.5)', fontSize: '0.85rem' }}>Usuarios</span>
@@ -182,8 +187,11 @@ function SettingsView() {
               <span style={{ fontWeight: 600, color: '#10b981' }}>Mayo 2025</span>
             </div>
           </div>
-          <button style={{ width: '100%', padding: '0.75rem', borderRadius: '10px', border: '1px solid var(--accent-cyan)', background: 'rgba(6,182,212,0.08)', color: 'var(--accent-cyan)', cursor: 'pointer', fontWeight: 600, fontFamily: 'inherit', transition: 'all 0.2s' }}>
-            Mejorar Plan ✦
+          <button 
+            onClick={() => isPremium ? window.open('https://billing.stripe.com/p/login/test_6oE14Uf4U2q26He6oo', '_blank') : navigate('/pricing')}
+            style={{ width: '100%', padding: '0.75rem', borderRadius: '10px', border: isPremium ? '1px solid rgba(255,255,255,0.1)' : '1px solid var(--accent-cyan)', background: isPremium ? 'rgba(255,255,255,0.05)' : 'rgba(6,182,212,0.08)', color: isPremium ? 'white' : 'var(--accent-cyan)', cursor: 'pointer', fontWeight: 600, fontFamily: 'inherit', transition: 'all 0.2s' }}
+          >
+            {isPremium ? 'Gestionar Facturación 💳' : 'Mejorar Plan ✦'}
           </button>
         </div>
       </div>

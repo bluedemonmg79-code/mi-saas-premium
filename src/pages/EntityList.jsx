@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { useOutletContext } from 'react-router-dom';
-import { Users, Search, Plus, X, Phone, Mail, Calendar, ChevronRight, Edit2, Trash2, Lock, Download, MessageCircle } from 'lucide-react';
+import { useOutletContext, useSearchParams } from 'react-router-dom';
+import { Users, Search, Plus, X, Phone, Mail, Calendar, ChevronRight, Edit2, Trash2, Lock, Download, MessageCircle, Printer } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
@@ -38,6 +38,70 @@ function ProfileModal({ entity, config, onClose, onDelete, onUpdate }) {
     window.open(`https://wa.me/${cleanPhone}?text=${message}`, '_blank');
   };
 
+  const printDocument = () => {
+    const printWindow = window.open('', '_blank');
+    const primaryColor = config.primaryColor || '#10b981';
+    printWindow.document.write(`
+      <html>
+        <head>
+          <title>${config.documentTitle || 'Documento Formal'}</title>
+          <style>
+            body { font-family: 'Inter', system-ui, sans-serif; padding: 40px; color: #1e293b; max-width: 800px; margin: 0 auto; line-height: 1.6; }
+            .header { border-bottom: 2px solid ${primaryColor}; padding-bottom: 20px; margin-bottom: 30px; display: flex; justify-content: space-between; align-items:flex-end; }
+            .logo { font-size: 26px; font-weight: bold; color: #0f172a; }
+            .meta { text-align: right; font-size: 14px; color: #64748b; }
+            .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 40px; background: #f8fafc; padding: 20px; border-radius: 8px; border-left: 4px solid ${primaryColor}; }
+            .info-item label { display: block; font-size: 12px; font-weight: bold; color: #94a3b8; text-transform: uppercase; }
+            .info-item div { font-size: 16px; font-weight: 600; }
+            .content-box { border: 1px dashed #cbd5e1; padding: 30px; min-height: 350px; border-radius: 8px; background: #ffffff;}
+            .footer { margin-top: 50px; text-align: center; font-size: 12px; color: #94a3b8; }
+            .signature { margin-top: 80px; width: 250px; border-top: 1px solid #cbd5e1; text-align: center; padding-top: 10px; font-weight: bold; margin-left: auto; margin-right: auto; color: #475569;}
+            @media print { body { padding: 0; } }
+          </style>
+        </head>
+        <body>
+          <div class="header">
+            <div class="logo">${config.appName}</div>
+            <div class="meta">
+              Fecha: ${new Date().toLocaleDateString()}<br/>
+              <b>${config.documentTitle || 'Documento Formal'}</b>
+            </div>
+          </div>
+          <div class="info-grid">
+            <div class="info-item"><label>Paciente / Cliente</label><div>${entity.name}</div></div>
+            <div class="info-item"><label>Contacto</label><div>${entity.phone || entity.email || 'N/A'}</div></div>
+            <div class="info-item"><label>Motivo / Servicio</label><div>${entity.detail || 'N/A'}</div></div>
+            <div class="info-item"><label>Estado</label><div>${s.label}</div></div>
+          </div>
+          <p style="color: #64748b; font-size: 0.9rem; margin-bottom: 25px;">Documento generado electrónicamente en la fecha mencionada.</p>
+          
+          <div style="background: #f8fafc; padding: 25px; border-radius: 12px; margin-bottom: 30px; border: 1px solid #e2e8f0;">
+            <h2 style="font-size: 1.1rem; color: #1e293b; margin-top: 0; border-bottom: 2px solid #e2e8f0; padding-bottom: 8px;">Detalles de la Consulta / Servicio</h2>
+            <p style="font-size: 1.2rem; font-weight: 700; color: #0f172a; margin: 15px 0;">${entity.detail || 'Valoración General'}</p>
+            
+            ${entity.notes ? `
+              <h3 style="font-size: 0.9rem; color: #64748b; margin-top: 20px; text-transform: uppercase; letter-spacing: 1px;">Indicaciones y Notas</h3>
+              <p style="font-size: 1rem; color: #334155; line-height: 1.6; background: white; padding: 15px; border-radius: 8px; border: 1px solid #cbd5e1;">${entity.notes}</p>
+            ` : ''}
+          </div>
+          <div class="signature">
+             Firma Autorizada<br/>
+             <span style="font-size:12px; font-weight:normal;">${config.labels.welcome}</span>
+          </div>
+          <div class="footer">
+            Documento generado electrónicamente de forma segura por el sistema ${config.appName}.<br/>
+            Para uso exclusivo corporativo y del cliente.
+          </div>
+        </body>
+      </html>
+    `);
+    printWindow.document.close();
+    printWindow.focus();
+    setTimeout(() => {
+      printWindow.print();
+    }, 500);
+  };
+
   return (
     <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.7)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, backdropFilter: 'blur(4px)' }} onClick={onClose}>
       <div style={{ background: '#1e293b', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '20px', padding: '2.5rem', width: '440px', position: 'relative' }} onClick={e => e.stopPropagation()}>
@@ -54,7 +118,11 @@ function ProfileModal({ entity, config, onClose, onDelete, onUpdate }) {
             <input value={form.name} onChange={e => setForm({...form, name: e.target.value})} placeholder="Nombre completo" required style={inputStyle} />
             <input type="email" value={form.email} onChange={e => setForm({...form, email: e.target.value})} placeholder="Correo electrónico" style={inputStyle} />
             <input value={form.phone} onChange={e => setForm({...form, phone: e.target.value})} placeholder="Teléfono" style={inputStyle} />
-            <input value={form.detail} onChange={e => setForm({...form, detail: e.target.value})} placeholder="Motivo / Servicio" style={inputStyle} />
+            <input value={form.detail} onChange={e => setForm({...form, detail: e.target.value})} placeholder="Motivo / Servicio" list="catalog-list" style={inputStyle} />
+            <textarea value={form.notes} onChange={e => setForm({...form, notes: e.target.value})} placeholder="Notas / Observaciones..." style={{ ...inputStyle, minHeight: '80px', resize: 'none' }} />
+            <datalist id="catalog-list">
+              {config.catalog?.map((item, idx) => <option key={idx} value={item} />)}
+            </datalist>
             <button type="submit" className="btn-primary" style={{ padding: '0.8rem', justifyContent: 'center' }}>Guardar Cambios</button>
           </form>
         ) : (
@@ -71,10 +139,15 @@ function ProfileModal({ entity, config, onClose, onDelete, onUpdate }) {
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem', color: 'rgba(255,255,255,0.7)' }}><Phone size={16} color="var(--accent-cyan)" /> {entity.phone || 'Sin teléfono'}</div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem', color: 'rgba(255,255,255,0.7)' }}><Calendar size={16} color="var(--accent-cyan)" /> Registro: {entity.created_at?.split('T')[0] || entity.date || '-'}</div>
               {entity.detail && <div style={{ background: 'rgba(255,255,255,0.05)', borderRadius: '10px', padding: '1rem', marginTop: '0.5rem' }}><p style={{ margin: 0, fontSize: '0.85rem', color: 'rgba(255,255,255,0.5)', marginBottom: '4px' }}>Servicio / Tratamiento</p><p style={{ margin: 0, fontWeight: 600 }}>{entity.detail}</p></div>}
-              
-              <button onClick={openWhatsApp} className="btn-primary" style={{ width: '100%', justifyContent: 'center', marginTop: '1rem', background: 'linear-gradient(135deg, #10b981, #059669)', color: 'white' }}>
-                <MessageCircle size={18} /> Contactar por WhatsApp
-              </button>
+              {entity.notes && <div style={{ background: 'rgba(255,255,255,0.03)', borderRadius: '10px', padding: '1rem', border: '1px solid rgba(255,255,255,0.05)' }}><p style={{ margin: 0, fontSize: '0.85rem', color: 'rgba(255,255,255,0.3)', marginBottom: '4px' }}>Notas e Historial</p><p style={{ margin: 0, fontSize: '0.9rem', lineHeight: '1.4' }}>{entity.notes}</p></div>}
+              <div style={{ display: 'flex', gap: '10px', marginTop: '1rem' }}>
+                <button onClick={openWhatsApp} className="btn-primary" style={{ flex: 1, justifyContent: 'center', background: 'linear-gradient(135deg, #10b981, #059669)', color: 'white' }}>
+                  <MessageCircle size={18} /> WhatsApp
+                </button>
+                <button onClick={printDocument} className="btn-secondary" style={{ flex: 1, justifyContent: 'center', background: 'var(--accent-purple)', color: 'white', border: 'none', padding: '0.8rem', borderRadius: '10px', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
+                  <Printer size={18} /> Imprimir PDF
+                </button>
+              </div>
             </div>
           </>
         )}
@@ -84,7 +157,7 @@ function ProfileModal({ entity, config, onClose, onDelete, onUpdate }) {
 }
 
 function NewEntityModal({ config, onClose, onSave }) {
-  const [form, setForm] = useState({ name: '', email: '', phone: '', detail: '' });
+  const [form, setForm] = useState({ name: '', email: '', phone: '', detail: config.catalog?.[0] || '', notes: '' });
   const [saving, setSaving] = useState(false);
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -103,7 +176,14 @@ function NewEntityModal({ config, onClose, onSave }) {
           <div><label style={{ display: 'block', marginBottom: '6px', color: 'rgba(255,255,255,0.7)', fontSize: '0.85rem' }}>Nombre completo *</label><input required placeholder="Ej. Juan Pérez" value={form.name} onChange={e => setForm({...form, name: e.target.value})} style={inputStyle} /></div>
           <div><label style={{ display: 'block', marginBottom: '6px', color: 'rgba(255,255,255,0.7)', fontSize: '0.85rem' }}>Correo electrónico</label><input type="email" placeholder="correo@ejemplo.com" value={form.email} onChange={e => setForm({...form, email: e.target.value})} style={inputStyle} /></div>
           <div><label style={{ display: 'block', marginBottom: '6px', color: 'rgba(255,255,255,0.7)', fontSize: '0.85rem' }}>Teléfono</label><input placeholder="555-0000" value={form.phone} onChange={e => setForm({...form, phone: e.target.value})} style={inputStyle} /></div>
-          <div><label style={{ display: 'block', marginBottom: '6px', color: 'rgba(255,255,255,0.7)', fontSize: '0.85rem' }}>Servicio / Tratamiento</label><input placeholder="Ej. Consulta inicial" value={form.detail} onChange={e => setForm({...form, detail: e.target.value})} style={inputStyle} /></div>
+          <div>
+            <label style={{ display: 'block', marginBottom: '6px', color: 'rgba(255,255,255,0.7)', fontSize: '0.85rem' }}>Servicio / Tratamiento</label>
+            <input value={form.detail} onChange={e => setForm({...form, detail: e.target.value})} placeholder="Motivo / Servicio" list="new-catalog-list" style={inputStyle} />
+            <textarea value={form.notes} onChange={e => setForm({...form, notes: e.target.value})} placeholder="Observaciones / Notas internas..." style={{ ...inputStyle, minHeight: '80px', resize: 'none' }} />
+            <datalist id="new-catalog-list">
+              {config.catalog?.map((item, idx) => <option key={idx} value={item} />)}
+            </datalist>
+          </div>
           <button type="submit" disabled={saving} style={{ marginTop: '0.5rem', padding: '0.9rem', borderRadius: '10px', border: 'none', background: 'linear-gradient(135deg, var(--accent-cyan), var(--accent-purple))', color: '#0f172a', fontWeight: 700, cursor: saving ? 'wait' : 'pointer', fontSize: '1rem' }}>
             {saving ? '⏳ Guardando...' : 'Guardar Registro'}
           </button>
@@ -114,7 +194,7 @@ function NewEntityModal({ config, onClose, onSave }) {
 }
 
 function EntityList() {
-  const { config, currentNiche } = useOutletContext();
+  const { config, currentNiche, userProfile } = useOutletContext();
   const { user } = useAuth();
   const toast = useToast();
   const [search, setSearch] = useState('');
@@ -123,9 +203,19 @@ function EntityList() {
   const [selected, setSelected] = useState(null);
   const [showNew, setShowNew] = useState(false);
   const [showPaywall, setShowPaywall] = useState(false);
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  useEffect(() => {
+    if (searchParams.get('add') === 'true') {
+      handleNewClick();
+      setSearchParams({}, { replace: true });
+    }
+  }, [searchParams]);
+
+  const isPremium = userProfile?.subscription_status === 'active';
 
   const handleNewClick = () => {
-    if (entities.length >= FREE_PLAN_LIMIT) {
+    if (!isPremium && entities.length >= FREE_PLAN_LIMIT) {
       setShowPaywall(true);
     } else {
       setShowNew(true);
@@ -151,7 +241,7 @@ function EntityList() {
     const { error } = await supabase.from('entities').insert([{
       user_id: user.id, niche: currentNiche, avatar,
       name: form.name, email: form.email, phone: form.phone,
-      detail: form.detail, status: 'active'
+      detail: form.detail, notes: form.notes, status: 'active'
     }]);
     if (!error) {
       toast.success('Registro añadido');
@@ -173,7 +263,7 @@ function EntityList() {
   const handleUpdate = async (id, newForm) => {
     const avatar = newForm.name.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase();
     const { error } = await supabase.from('entities').update({
-      name: newForm.name, email: newForm.email, phone: newForm.phone, detail: newForm.detail, avatar
+      name: newForm.name, email: newForm.email, phone: newForm.phone, detail: newForm.detail, notes: newForm.notes, avatar
     }).eq('id', id);
     if (!error) {
       toast.success('Actualizado correctamente');
@@ -225,7 +315,7 @@ function EntityList() {
               <Download size={16} /> Exportar CSV
             </button>
             <button onClick={handleNewClick} className="btn-primary" style={{ margin: 0 }}>
-              {entities.length >= FREE_PLAN_LIMIT ? <Lock size={16} /> : <Plus size={16} />} Nuevo
+              {(!isPremium && entities.length >= FREE_PLAN_LIMIT) ? <Lock size={16} /> : <Plus size={16} />} Nuevo
             </button>
           </div>
         </div>
@@ -240,7 +330,7 @@ function EntityList() {
           <>
             <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.85rem', marginBottom: '1rem', marginTop: 0 }}>
               {filtered.length} {config.labels.clients.toLowerCase()} encontrados
-              {entities.length >= FREE_PLAN_LIMIT && (
+              {!isPremium && entities.length >= FREE_PLAN_LIMIT && (
                 <span style={{ marginLeft: '12px', background: 'rgba(99,102,241,0.15)', color: '#a5b4fc', padding: '2px 10px', borderRadius: '20px', fontSize: '0.78rem', fontWeight: 600 }}>
                   🔒 Límite del plan gratuito ({FREE_PLAN_LIMIT}/{FREE_PLAN_LIMIT})
                 </span>
