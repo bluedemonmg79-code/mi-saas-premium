@@ -44,13 +44,19 @@ function PublicBooking() {
     e.preventDefault();
     setBooking(true);
     try {
+      // Calcular índice de día (0: Lun, ..., 6: Dom)
+      // getUTCDay() da 0 para Domingo, 1 para Lunes...
+      const dateObj = new Date(selectedDate + 'T00:00:00');
+      const dayIndex = (dateObj.getDay() + 6) % 7;
+
       const { error } = await supabase.from('appointments').insert({
         user_id: prof.id,
         niche: prof.niche,
         name: form.name,
         email: form.email,
         phone: form.phone,
-        day: selectedDate,
+        day: dayIndex,
+        full_date: selectedDate,
         time: selectedTime,
         status: 'pending',
         origin: 'web'
