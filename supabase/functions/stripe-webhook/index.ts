@@ -31,7 +31,6 @@ serve(async (request) => {
     // Evento de pago exitoso (suscripción o pago único completado)
     if (event.type === 'checkout.session.completed') {
       const session = event.data.object as any
-      // 'client_reference_id' debe configurarse en el frontend (React) al momento de enviar al cliente al checkout de Stripe
       const userId = session.client_reference_id 
 
       if (userId) {
@@ -40,13 +39,33 @@ serve(async (request) => {
         const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
         const supabase = createClient(supabaseUrl, supabaseKey)
 
-        // Habilitar inmediatamente las ventajas Premium
+        // Obtener la sesión expandida para leer qué producto compró exactamente
+        const fullSession = await stripe.checkout.sessions.retrieve(session.id, {
+          expand: ['line_items']
+        })
+
+        const priceId = fullSession?.line_items?.data[0]?.price?.id
+        
+        const PRICE_BASIC = Deno.env.get("STRIPE_PRICE_BASIC") || "price_1TKmAWRzHRtT8e1bzEtj0NMW"
+        const PRICE_PRO = Deno.env.get("STRIPE_PRICE_PRO") || "price_1TKmBxRzHRtT8e1bK6zXQaeC"
+
+        let planType = 'premium' // Fallback
+        if (priceId === PRICE_BASIC) {
+          planType = 'basic'
+        } else if (priceId === PRICE_PRO) {
+          planType = 'pro'
+        } else {
+          // Si por alguna razón es otro precio, lo dejamos como Pro por defecto u otro que definas
+          planType = 'pro'
+        }
+
+        // Aplicar el estatus 'active' y el límite correcto
         await supabase
           .from('profiles')
-          .update({ subscription_status: 'active', plan_type: 'premium' })
+          .update({ subscription_status: 'active', plan_type: planType })
           .eq('id', userId)
           
-        console.log(`Usuario ${userId} ha sido ascendido a Premium exitosamente.`)
+        console.log(`Usuario ${userId} ha sido ascendido al plan ${planType} (Price: ${priceId})`)
       } else {
          console.warn("Se completó el checkout pero no se proporcionó client_reference_id")
       }

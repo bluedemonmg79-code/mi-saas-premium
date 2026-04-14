@@ -6,7 +6,8 @@ import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
 import PaywallModal from '../components/PaywallModal';
 
-const FREE_PLAN_LIMIT = 3; // Máximo de registros en plan gratuito
+const FREE_PLAN_LIMIT = 8; // Máximo de registros en plan gratuito
+const BASIC_PLAN_LIMIT = 50; // Máximo de registros en plan básico
 
 const statusConfig = {
   active:   { label: 'Activo',    color: '#10b981', bg: 'rgba(16,185,129,0.15)' },
@@ -213,9 +214,15 @@ function EntityList() {
   }, [searchParams]);
 
   const isPremium = userProfile?.subscription_status === 'active';
+  const planType = userProfile?.plan_type || 'free';
+  
+  const currentLimit = 
+    isPremium && planType === 'pro' ? Infinity :
+    isPremium && planType === 'basic' ? BASIC_PLAN_LIMIT :
+    FREE_PLAN_LIMIT;
 
   const handleNewClick = () => {
-    if (!isPremium && entities.length >= FREE_PLAN_LIMIT) {
+    if (entities.length >= currentLimit) {
       setShowPaywall(true);
     } else {
       setShowNew(true);
@@ -315,7 +322,7 @@ function EntityList() {
               <Download size={16} /> Exportar CSV
             </button>
             <button onClick={handleNewClick} className="btn-primary" style={{ margin: 0 }}>
-              {(!isPremium && entities.length >= FREE_PLAN_LIMIT) ? <Lock size={16} /> : <Plus size={16} />} Nuevo
+              {entities.length >= currentLimit ? <Lock size={16} /> : <Plus size={16} />} Nuevo
             </button>
           </div>
         </div>
@@ -330,9 +337,9 @@ function EntityList() {
           <>
             <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.85rem', marginBottom: '1rem', marginTop: 0 }}>
               {filtered.length} {config.labels.clients.toLowerCase()} encontrados
-              {!isPremium && entities.length >= FREE_PLAN_LIMIT && (
+              {entities.length >= currentLimit && (
                 <span style={{ marginLeft: '12px', background: 'rgba(99,102,241,0.15)', color: '#a5b4fc', padding: '2px 10px', borderRadius: '20px', fontSize: '0.78rem', fontWeight: 600 }}>
-                  🔒 Límite del plan gratuito ({FREE_PLAN_LIMIT}/{FREE_PLAN_LIMIT})
+                  🔒 Límite de tu plan alcanzado ({entities.length}/{currentLimit})
                 </span>
               )}
             </p>

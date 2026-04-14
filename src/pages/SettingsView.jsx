@@ -237,13 +237,13 @@ function SettingsView() {
 
           <h3 style={{ margin: '0 0 0.5rem' }}>{form.businessName || config.appName}</h3>
           <p style={{ color: isPremium ? '#10b981' : 'rgba(255,255,255,0.5)', fontSize: '0.85rem', margin: 0, fontWeight: isPremium ? 700 : 400 }}>
-            {isPremium ? '✦ Plan Ilimitado' : 'Plan Básico (Gratis)'}
+            {isPremium && userProfile?.plan_type === 'pro' ? '✦ Plan Pro (Ilimitado)' : isPremium && userProfile?.plan_type === 'basic' ? '✦ Plan Básico (50)' : 'Plan Gratuito'}
           </p>
           <div style={{ margin: '1.2rem 0', borderTop: '1px solid rgba(255,255,255,0.08)', paddingTop: '1.2rem' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.6rem' }}>
               <span style={{ color: 'rgba(255,255,255,0.5)', fontSize: '0.85rem' }}>{config.labels.clients}</span>
               <span style={{ fontWeight: 600, color: isPremium ? '#10b981' : 'white' }}>
-                {isPremium ? 'Ilimitados' : 'Límite de 3'}
+                {isPremium && userProfile?.plan_type === 'pro' ? 'Ilimitados' : isPremium && userProfile?.plan_type === 'basic' ? 'Límite de 50' : 'Límite de 8'}
               </span>
             </div>
             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.6rem' }}>
@@ -260,6 +260,17 @@ function SettingsView() {
             style={{ width: '100%', padding: '0.75rem', borderRadius: '10px', border: isPremium ? '1px solid rgba(255,255,255,0.1)' : '1px solid var(--accent-cyan)', background: isPremium ? 'rgba(255,255,255,0.05)' : 'rgba(6,182,212,0.08)', color: isPremium ? 'white' : 'var(--accent-cyan)', cursor: 'pointer', fontWeight: 600, fontFamily: 'inherit', transition: 'all 0.2s' }}
           >
             {isPremium ? 'Gestionar Facturación 💳' : 'Mejorar Plan ✦'}
+          </button>
+
+          {/* Botón temporal de prueba para borrar nicho */}
+          <button 
+            onClick={async () => {
+              await supabase.from('profiles').upsert({ id: user.id, niche: null });
+              window.location.reload();
+            }}
+            style={{ width: '100%', padding: '0.6rem', marginTop: '1rem', borderRadius: '10px', border: '1px dashed #ef4444', background: 'transparent', color: '#ef4444', cursor: 'pointer', fontSize: '0.8rem' }}
+          >
+            Peligro: Resetear Especialidad ⚠️
           </button>
         </div>
       </div>
