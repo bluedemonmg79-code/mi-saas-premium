@@ -15,6 +15,7 @@ const Login       = lazy(() => import('./pages/Login'));
 const Pricing     = lazy(() => import('./pages/Pricing'));
 const UpdatePassword = lazy(() => import('./pages/UpdatePassword'));
 const PublicBooking = lazy(() => import('./pages/PublicBooking'));
+const LandingPage   = lazy(() => import('./pages/LandingPage'));
 
 const PageLoader = () => (
   <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#0f172a', color: 'rgba(255,255,255,0.4)', gap: '12px' }}>
@@ -55,8 +56,8 @@ function App() {
               </Route>
               
               {/* Fallback */}
-              <Route path="/" element={<Navigate to="/login" replace />} />
-              <Route path="*" element={<Navigate to="/login" replace />} />
+              <Route path="/" element={<LandingPage />} />
+              <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>
           </Suspense>
         </BrowserRouter>
