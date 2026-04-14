@@ -308,10 +308,26 @@ const LandingPage = () => {
       </section>
 
       {/* PRICING TABLE */}
-      <section id="precios" style={{ padding: '120px 20px', background: 'radial-gradient(circle at 50% 50%, rgba(99,102,241,0.05), transparent 70%)' }}>
+      <section id="precios" style={{ padding: '120px 20px', background: 'radial-gradient(circle at 50% 50%, rgba(99,102,241,0.08), transparent 70%)' }}>
         <div className="reveal-on-scroll" style={{ maxWidth: '1000px', margin: '0 auto', textAlign: 'center' }}>
-          <h2 style={{ fontSize: '4rem', fontWeight: 950, marginBottom: '5rem', letterSpacing: '-3px' }}>Da el paso a la <span style={{ color: 'var(--accent-purple)' }}>grandeza.</span></h2>
-          <div style={{ background: 'rgba(7, 10, 20, 0.4)', padding: '2rem', borderRadius: '40px', border: '1px solid rgba(255,255,255,0.05)', backdropFilter: 'blur(30px)' }}>
+          <h2 style={{ fontSize: '4rem', fontWeight: 950, marginBottom: '4rem', letterSpacing: '-3px' }}>Da el paso a la <span style={{ color: 'var(--accent-purple)' }}>grandeza.</span></h2>
+          
+          <div style={{ 
+            background: 'white', 
+            padding: '2rem', 
+            borderRadius: '40px', 
+            boxShadow: '0 40px 100px rgba(0,0,0,0.6)',
+            position: 'relative',
+            overflow: 'hidden'
+          }}>
+            {/* Badge para suavizar el contraste */}
+            <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '8px', background: 'linear-gradient(to right, #6366f1, #a855f7)' }}></div>
+            
+            <p style={{ color: '#64748b', fontSize: '0.9rem', fontWeight: 600, marginBottom: '2rem' }}>
+              <Shield size={14} style={{ verticalAlign: 'middle', marginRight: '6px' }} /> 
+              Planes Flexibles en Pesos Mexicanos (MXN)
+            </p>
+
             <stripe-pricing-table
               pricing-table-id="prctbl_1TKmNeRzHRtT8e1b7CUMp6tx"
               publishable-key="pk_test_51TKlBcRzHRtT8e1byh4GMNN27g3iPpEX4MD6gIUFWCYEH7CkYQhQYQVYJcNno1M5FGWXIjJx5UsvWCIQj5dOPDCk00xMl03wSR"
@@ -323,7 +339,7 @@ const LandingPage = () => {
       {/* FOOTER v3.0 */}
       <footer style={{ padding: '120px 20px 60px', borderTop: '1px solid rgba(255,255,255,0.05)', background: '#03050a' }}>
         <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '6rem', marginBottom: '6rem' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '4rem', marginBottom: '6rem' }}>
             <div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '2rem' }}>
                 <Zap size={30} color="#6366f1" fill="#6366f1" />
@@ -333,12 +349,23 @@ const LandingPage = () => {
             </div>
             <div>
               <h4 style={{ marginBottom: '2rem', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '2px', fontSize: '0.9rem' }}>Compañía</h4>
-              <nav style={{ display: 'flex', flexDirection: 'column', gap: '1.2rem', color: 'rgba(255,255,255,0.4)', fontWeight: 600 }}>
+              <nav style={{ display: 'flex', flexDirection: 'column', gap: '1.2rem', color: 'rgba(255,255,255,0.6)', fontWeight: 600 }}>
                 <a href="#" style={{ color: 'inherit', textDecoration: 'none' }}>Sobre Nosotros</a>
                 <a href="#" style={{ color: 'inherit', textDecoration: 'none' }}>Blog</a>
                 <a href="#" style={{ color: 'inherit', textDecoration: 'none' }}>Contacto</a>
                 <a href="#" style={{ color: 'inherit', textDecoration: 'none' }}>Soporte</a>
               </nav>
+            </div>
+            <div>
+              <h4 style={{ marginBottom: '2rem', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '2px', fontSize: '0.9rem' }}>Ubicación & Soporte</h4>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', color: 'rgba(255,255,255,0.7)', fontWeight: 500 }}>
+                <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}><Mail size={16} color="var(--accent-cyan)" /> support@pronexusglobal.com</div>
+                <div style={{ display: 'flex', gap: '12px', alignItems: 'flex-start' }}>
+                  <MapPin size={18} color="var(--accent-cyan)" style={{ marginTop: '4px', flexShrink: 0 }} /> 
+                  <span style={{ lineHeight: 1.5 }}>Av. Paseo de la Reforma 222, Piso 12,<br/>Cuauhtémoc, CDMX, 06600</span>
+                </div>
+                <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}><Phone size={16} color="var(--accent-cyan)" /> +52 (55) 1234-5678</div>
+              </div>
             </div>
             <div>
               <h4 style={{ marginBottom: '2rem', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '2px', fontSize: '0.9rem' }}>Newsletter</h4>
