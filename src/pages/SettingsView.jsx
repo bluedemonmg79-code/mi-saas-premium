@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { useOutletContext } from 'react-router-dom';
+import { useOutletContext, useNavigate } from 'react-router-dom';
 import { Settings, Building, Phone, Mail, Globe, Save, Check, Upload, Loader, CreditCard, ExternalLink } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
 
 function SettingsView() {
+  const navigate = useNavigate();
   const { config, currentNiche, userProfile } = useOutletContext();
-  const isPremium = userProfile?.subscription_status === 'active';
   const [saved, setSaved] = useState(false);
   const [form, setForm] = useState({
     businessName: config.appName,

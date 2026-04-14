@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { 
   Zap, 
@@ -171,7 +171,6 @@ const LanguageSwitcher = () => {
 };
 
 const LandingPage = () => {
-  const navigate = useNavigate();
   const { t } = useTranslation();
   const [scrolled, setScrolled] = useState(false);
   
@@ -302,7 +301,7 @@ const LandingPage = () => {
         <div style={{ display: 'flex', width: '200%', animation: 'marquee 40s linear infinite', gap: '150px', alignItems: 'center', opacity: 0.25 }}>
           {[1,2,3,4,1,2,3,4].map((_, i) => (
             <div key={i} style={{ fontSize: '1.8rem', fontWeight: 950, display: 'flex', alignItems: 'center', gap: '20px' }}>
-              <Activity size={24}/> {t('marquee.dental')} <Server size={24}/> {t('marquee.legal')} <Users size={24}/> {t('marquee.coach')} <Briefcase size={24}/> {t('marquee.briefcase')}
+              <Activity size={24}/> {t('marquee.dental')} <Server size={24}/> {t('marquee.legal')} <Users size={24}/> {t('marquee.coach')} <Briefcase size={24}/> {t('marquee.legal')}
             </div>
           ))}
         </div>
@@ -349,7 +348,7 @@ const LandingPage = () => {
       <section id="precios" style={{ padding: '140px 20px', background: 'radial-gradient(circle at 50% 50%, rgba(99,102,241,0.08), transparent 70%)' }}>
         <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
           <div className="reveal-on-scroll" style={{ textAlign: 'center', marginBottom: '6rem' }}>
-            <h2 style={{ fontSize: '4rem', fontWeight: 950, letterSpacing: '-px', marginBottom: '1.5rem' }}>{t('pricing.title_part1')} <span style={{ color: 'var(--accent-purple)' }}>{t('pricing.title_part2')}</span></h2>
+            <h2 style={{ fontSize: '4rem', fontWeight: 950, letterSpacing: '-2px', marginBottom: '1.5rem' }}>{t('pricing.title_part1')} <span style={{ color: 'var(--accent-purple)' }}>{t('pricing.title_part2')}</span></h2>
             <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '1.3rem' }}>{t('pricing.subtitle')}</p>
           </div>
 
@@ -396,7 +395,7 @@ const LandingPage = () => {
       <section id="testimonials" style={{ padding: '140px 20px', borderTop: '1px solid rgba(255,255,255,0.05)' }}>
         <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
           <div className="reveal-on-scroll" style={{ textAlign: 'center', marginBottom: '6rem' }}>
-            <h2 style={{ fontSize: '4rem', fontWeight: 950, letterSpacing: '-px', marginBottom: '1.5rem' }}>{t('testimonials.title_part1')} <br/> <span style={{ color: 'var(--accent-cyan)' }}>{t('testimonials.title_part2')}</span></h2>
+            <h2 style={{ fontSize: '4rem', fontWeight: 950, letterSpacing: '-2px', marginBottom: '1.5rem' }}>{t('testimonials.title_part1')} <br/> <span style={{ color: 'var(--accent-cyan)' }}>{t('testimonials.title_part2')}</span></h2>
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '30px' }}>
             {[1,2,3].map(i => (

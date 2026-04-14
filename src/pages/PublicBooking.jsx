@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Calendar, Clock, User, Mail, Phone, CheckCircle, ArrowLeft, Loader } from 'lucide-react';
 import { supabase } from '../lib/supabase';
