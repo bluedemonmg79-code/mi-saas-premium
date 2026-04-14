@@ -262,16 +262,7 @@ function SettingsView() {
             {isPremium ? 'Gestionar Facturación 💳' : 'Mejorar Plan ✦'}
           </button>
 
-          {/* Botón temporal de prueba para borrar nicho */}
-          <button 
-            onClick={async () => {
-              await supabase.from('profiles').upsert({ id: user.id, niche: null });
-              window.location.reload();
-            }}
-            style={{ width: '100%', padding: '0.6rem', marginTop: '1rem', borderRadius: '10px', border: '1px dashed #ef4444', background: 'transparent', color: '#ef4444', cursor: 'pointer', fontSize: '0.8rem' }}
-          >
-            Peligro: Resetear Especialidad ⚠️
-          </button>
+
         </div>
       </div>
     </div>
