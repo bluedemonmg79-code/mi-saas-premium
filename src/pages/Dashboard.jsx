@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useOutletContext } from 'react-router-dom';
-import { Users, CalendarCheck, DollarSign, TrendingUp, Loader, Clock, Phone, Mail, X, CheckCircle, MessageCircle } from 'lucide-react';
+import { Users, CalendarCheck, DollarSign, TrendingUp, Loader, Clock, Phone, Mail, X, CheckCircle, MessageCircle, Trash2 } from 'lucide-react';
 import DashboardChart from '../components/DashboardChart';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../context/AuthContext';
@@ -169,6 +169,22 @@ function Dashboard() {
                   <MessageCircle size={18} /> Enviar WhatsApp
                 </button>
               )}
+
+              <button 
+                onClick={async () => {
+                  if(!window.confirm('¿Estás seguro de que deseas cancelar esta cita?')) return;
+                  setUpdating(true);
+                  const { error } = await supabase.from('appointments').delete().eq('id', selectedApp.id);
+                  if (!error) {
+                    setAppointments(appointments.filter(a => a.id !== selectedApp.id));
+                    setSelectedApp(null);
+                  }
+                  setUpdating(false);
+                }}
+                style={{ width: '100%', padding: '0.9rem', borderRadius: '12px', border: 'none', background: 'rgba(239,68,68,0.1)', color: '#fca5a5', fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}
+              >
+                <Trash2 size={18} /> Cancelar Cita
+              </button>
             </div>
           </div>
         </div>
