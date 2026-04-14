@@ -19,7 +19,12 @@ import {
   Lock,
   MessageSquare,
   Activity,
-  Server
+  Server,
+  Facebook,
+  Instagram,
+  Linkedin,
+  Twitter,
+  Briefcase
 } from 'lucide-react';
 
 // Componente para contadores animados
@@ -58,12 +63,82 @@ const Counter = ({ end, duration = 2000, suffix = "" }) => {
   return <span ref={countRef}>{count}{suffix}</span>;
 };
 
+// COMPONENTE DE TARJETA DE PRECIO CUSTOM
+const PricingCard = ({ title, price, description, features, accent, highlighted, buttonText, waMessage }) => {
+  const whatsappNumber = "525512345678"; // Número de placeholder
+  const waUrl = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(waMessage)}`;
+
+  return (
+    <div className="bento-card reveal-on-scroll" style={{ 
+      gridColumn: highlighted ? 'span 6' : 'span 3',
+      padding: '3.5rem 2.5rem',
+      borderRadius: '40px',
+      display: 'flex',
+      flexDirection: 'column',
+      position: 'relative',
+      background: highlighted ? 'rgba(255,255,255,0.03)' : 'rgba(255,255,255,0.01)',
+      border: highlighted ? `1px solid ${accent}` : '1px solid rgba(255,255,255,0.05)',
+      transform: highlighted ? 'scale(1.02)' : 'scale(1)',
+      zIndex: highlighted ? 2 : 1
+    }}>
+      {highlighted && (
+        <div style={{ 
+          position: 'absolute', top: '-15px', right: '2rem', background: accent, 
+          padding: '6px 16px', borderRadius: '30px', fontSize: '0.75rem', fontWeight: 900,
+          boxShadow: `0 0 20px ${accent}`
+        }}>
+          POPULAR
+        </div>
+      )}
+      
+      <div style={{ marginBottom: '2.5rem' }}>
+        <h3 style={{ fontSize: '1.8rem', fontWeight: 950, marginBottom: '0.5rem' }}>{title}</h3>
+        <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.9rem' }}>{description}</p>
+      </div>
+
+      <div style={{ marginBottom: '3rem' }}>
+        <div style={{ display: 'flex', alignItems: 'baseline', gap: '8px' }}>
+          <span style={{ fontSize: '3rem', fontWeight: 950 }}>MX${price}</span>
+          <span style={{ color: 'rgba(255,255,255,0.3)', fontWeight: 600 }}>/mes</span>
+        </div>
+      </div>
+
+      <div style={{ flex: 1, marginBottom: '3rem' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.2rem' }}>
+          {features.map((f, i) => (
+            <div key={i} style={{ display: 'flex', gap: '12px', alignItems: 'center', fontSize: '0.95rem', color: 'rgba(255,255,255,0.7)' }}>
+              <CheckCircle size={18} color={accent} />
+              {f}
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <a 
+        href={waUrl}
+        target="_blank"
+        rel="noopener noreferrer"
+        style={{ 
+          padding: '18px', background: highlighted ? accent : 'white', 
+          color: highlighted ? 'white' : 'black',
+          borderRadius: '16px', textAlign: 'center', textDecoration: 'none',
+          fontWeight: 900, fontSize: '1rem', transition: 'all 0.3s',
+          boxShadow: highlighted ? `0 15px 30px -10px ${accent}` : 'none'
+        }}
+        onMouseEnter={e => e.currentTarget.style.transform = 'translateY(-3px)'}
+        onMouseLeave={e => e.currentTarget.style.transform = 'translateY(0)'}
+      >
+        {buttonText}
+      </a>
+    </div>
+  );
+};
+
 const LandingPage = () => {
   const navigate = useNavigate();
   const [scrolled, setScrolled] = useState(false);
   
   useEffect(() => {
-    // Escuchar movimiento del mouse para el efecto glow de las bento cards
     const handleMouseMove = (e) => {
       for (const card of document.getElementsByClassName("bento-card")) {
         const rect = card.getBoundingClientRect(),
@@ -75,7 +150,6 @@ const LandingPage = () => {
     };
     window.addEventListener("mousemove", handleMouseMove);
     
-    // Revelar elementos al hacer scroll
     const observer = new IntersectionObserver((entries) => {
       entries.forEach(entry => {
         if (entry.isIntersecting) entry.target.classList.add('active');
@@ -99,10 +173,9 @@ const LandingPage = () => {
       fontFamily: 'Outfit, sans-serif', overflowX: 'hidden'
     }}>
       
-      {/* FONDO ANIMADO DE AURA */}
       <div className="aura-bg"></div>
 
-      {/* NAVBAR v3.0 */}
+      {/* NAVBAR */}
       <nav style={{ 
         position: 'fixed', top: 0, left: 0, right: 0, zIndex: 1000, 
         padding: scrolled ? '0.8rem 2rem' : '1.5rem 2rem', 
@@ -123,38 +196,31 @@ const LandingPage = () => {
         
         <div style={{ display: 'flex', gap: '2.5rem', alignItems: 'center' }}>
           {['Funciones', 'Testimonios', 'Precios'].map(item => (
-            <a key={item} href={`#${item === 'Funciones' ? 'features' : item.toLowerCase()}`} style={{ color: 'rgba(255,255,255,0.6)', textDecoration: 'none', fontSize: '0.9rem', fontWeight: 600, transition: 'all 0.3s' }} onMouseEnter={e => e.target.style.color = 'white'} onMouseLeave={e => e.target.style.color = 'rgba(255,255,255,0.6)'}>
+            <a key={item} href={`#${item === 'Funciones' ? 'features' : item.toLowerCase()}`} style={{ color: 'rgba(255,255,255,0.6)', textDecoration: 'none', fontSize: '0.9rem', fontWeight: 600, transition: 'all 0.3s' }}>
               {item}
             </a>
           ))}
           <Link to="/login" style={{ 
             padding: '12px 28px', borderRadius: '14px', background: 'white', color: '#070a14', 
-            textDecoration: 'none', fontSize: '0.95rem', fontWeight: 800, transition: 'all 0.4s',
-            boxShadow: scrolled ? '0 10px 20px rgba(255,255,255,0.1)' : 'none'
-          }} onMouseEnter={e => e.currentTarget.style.transform = 'translateY(-2px)'} onMouseLeave={e => e.currentTarget.style.transform = 'translateY(0)'}>
+            textDecoration: 'none', fontSize: '0.95rem', fontWeight: 800
+          }}>
             Entrar
           </Link>
         </div>
       </nav>
 
-      {/* HERO SECTION v3.0 */}
-      <section style={{ 
-        padding: '200px 20px 100px', textAlign: 'center', 
-        position: 'relative', zIndex: 1
-      }}>
+      {/* HERO SECTION */}
+      <section style={{ padding: '200px 20px 100px', textAlign: 'center', position: 'relative', zIndex: 1 }}>
         <div className="reveal-on-scroll" style={{ maxWidth: '1200px', margin: '0 auto' }}>
           <div style={{ 
             display: 'inline-flex', alignItems: 'center', gap: '8px', background: 'rgba(255, 255, 255, 0.03)', 
             border: '1px solid rgba(255, 255, 255, 0.08)', padding: '8px 20px', borderRadius: '30px', 
-            marginBottom: '3rem', color: 'rgba(255,255,255,0.7)', fontSize: '0.9rem', fontWeight: 600,
-            backdropFilter: 'blur(10px)'
+            marginBottom: '3rem', color: 'rgba(255,255,255,0.7)', fontSize: '0.9rem', fontWeight: 600
           }}>
-            <Sparkles size={16} color="var(--accent-cyan)" /> <span style={{ color: 'white' }}>Nueva v3.0 Élite</span> — Inteligencia de Agenda
+            <Sparkles size={16} color="var(--accent-cyan)" /> <span style={{ color: 'white' }}>Lanzamiento Oficial</span> — Elite v4.0
           </div>
           
-          <h1 style={{ 
-            fontSize: 'max(4rem, 7vw)', fontWeight: 950, lineHeight: 0.95, letterSpacing: '-4px', marginBottom: '2.5rem'
-          }} className="glow-text">
+          <h1 style={{ fontSize: 'max(4rem, 7vw)', fontWeight: 950, lineHeight: 0.95, letterSpacing: '-4px', marginBottom: '2.5rem' }} className="glow-text">
             Gestiona tu éxito <br/>
             <span style={{ background: 'linear-gradient(to right, #6366f1, #a855f7)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
               Sin límites.
@@ -162,26 +228,23 @@ const LandingPage = () => {
           </h1>
           
           <p style={{ fontSize: '1.4rem', color: 'rgba(255,255,255,0.5)', maxWidth: '800px', margin: '0 auto 4.5rem', lineHeight: 1.5 }}>
-            La plataforma definitiva para profesionales que valoran su tiempo. Agendamiento inteligente, gestión de clientes y marca blanca en una sola suite.
+            La plataforma definitiva para profesionales de élite. Agendamiento inteligente, gestión de clientes y marca blanca total.
           </p>
 
           <div style={{ display: 'flex', gap: '1.5rem', justifyContent: 'center', marginBottom: '8rem' }}>
             <Link to="/login" style={{ 
               padding: '20px 50px', background: 'white', color: '#000', borderRadius: '20px', 
-              fontSize: '1.2rem', fontWeight: 900, textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '12px',
-              boxShadow: '0 20px 50px rgba(99,102,241,0.2)', transition: 'all 0.3s'
-            }} className="magnetic-button" onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.03)'} onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}>
+              fontSize: '1.2rem', fontWeight: 900, textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '12px'
+            }}>
               Empezar Gratis <ArrowRight size={22} />
             </Link>
             <a href="#features" style={{ 
-              padding: '200px 50px', // Corregido el padding accidental de 200px
               padding: '20px 50px', background: 'rgba(255,255,255,0.03)', color: 'white', 
               borderRadius: '20px', fontSize: '1.2rem', fontWeight: 700, textDecoration: 'none', 
-              border: '1px solid rgba(255,255,255,0.1)', transition: 'all 0.3s'
-            }} onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,255,255,0.06)'} onMouseLeave={e => e.currentTarget.style.background = 'rgba(255,255,255,0.03)'}>Ver funciones</a>
+              border: '1px solid rgba(255,255,255,0.1)'
+            }}>Ver funciones</a>
           </div>
 
-          {/* MOCKUP v3.0 - Visual Showcase */}
           <div style={{ position: 'relative' }}>
             <div style={{ position: 'absolute', inset: '-30px', background: 'radial-gradient(circle, #6366f1, transparent 70%)', opacity: 0.2, filter: 'blur(60px)', zIndex: -1 }}></div>
             <div style={{ 
@@ -190,153 +253,105 @@ const LandingPage = () => {
             }}>
               <img src="/pronexus_hero_mockup_1776126850527.png" alt="ProNexus UI" style={{ width: '100%', borderRadius: '25px', display: 'block' }} />
             </div>
-            
-            {/* Stats Badges Floating */}
-            <div style={{ position: 'absolute', top: '15%', right: '-4%', animation: 'float 5s ease-in-out infinite alternate', background: 'rgba(30,41,59,0.8)', padding: '20px 30px', borderRadius: '24px', border: '1px solid rgba(255,255,255,0.1)', backdropFilter: 'blur(15px)', textAlign: 'left' }}>
-              <div style={{ color: 'var(--accent-cyan)', fontSize: '1.8rem', fontWeight: 900 }}><Counter end={500} suffix="+" /></div>
-              <div style={{ fontSize: '0.8rem', opacity: 0.6, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '1px' }}>Profesionales Activos</div>
-            </div>
           </div>
         </div>
       </section>
 
-      {/* MARQUEE TRUST */}
+      {/* MARQUEE */}
       <div style={{ padding: '80px 0', borderTop: '1px solid rgba(255,255,255,0.05)', overflow: 'hidden' }}>
         <div style={{ display: 'flex', width: '200%', animation: 'marquee 40s linear infinite', gap: '150px', alignItems: 'center', opacity: 0.25 }}>
           {[1,2,3,4,1,2,3,4].map((_, i) => (
-            <div key={i} style={{ fontSize: '1.8rem', fontWeight: 950, whiteSpace: 'nowrap', display: 'flex', alignItems: 'center', gap: '20px', letterSpacing: '-1px' }}>
+            <div key={i} style={{ fontSize: '1.8rem', fontWeight: 950, display: 'flex', alignItems: 'center', gap: '20px' }}>
               <Activity size={24}/> DENTI-MAX <Server size={24}/> LEGAL-CORE <Users size={24}/> COACH-PRO <Briefcase size={24}/> EXPERT-HUB
             </div>
           ))}
         </div>
       </div>
 
-      {/* BENTO GRID v3.0 */}
+      {/* BENTO GRID */}
       <section id="features" style={{ padding: '140px 20px' }}>
         <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
           <div className="reveal-on-scroll" style={{ textAlign: 'center', marginBottom: '6rem' }}>
             <h2 style={{ fontSize: '4rem', fontWeight: 950, letterSpacing: '-3px', marginBottom: '1.5rem' }}>Poder absoluto en <span style={{ color: 'var(--accent-cyan)' }}>tus manos.</span></h2>
-            <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '1.3rem', maxWidth: '600px', margin: '0 auto' }}>Diseñamos cada función para ahorrarte tiempo y elevar tu marca personal.</p>
           </div>
 
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(12, 1fr)', gridAutoRows: 'minmax(220px, auto)', gap: '25px' }}>
-            {/* Bento Principal */}
             <div className="bento-card reveal-on-scroll" style={{ gridColumn: 'span 8', gridRow: 'span 2', padding: '3.5rem', borderRadius: '40px', display: 'flex', flexDirection: 'column', justifyContent: 'flex-end' }}>
-              <div style={{ position: 'absolute', top: '3rem', right: '3rem', color: 'var(--accent-blue)', opacity: 0.15 }}><Sparkles size={160} /></div>
               <h3 style={{ fontSize: '2.5rem', fontWeight: 900, marginBottom: '1.5rem' }}>Agenda Inteligente 🏛️</h3>
-              <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: '1.1rem', maxWidth: '450px', lineHeight: 1.6 }}>Tu link público detecta espacios libres y bloquea choques automáticamente. <br/><strong>Ahorra hasta <Counter end={10} suffix=" horas" /> a la semana.</strong></p>
+              <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: '1.1rem', maxWidth: '450px' }}>Tu link público detecta espacios libres y bloquea choques automáticamente. Ahorra hasta <Counter end={10} suffix=" horas" /> a la semana.</p>
             </div>
-            {/* White Label Box */}
             <div className="bento-card reveal-on-scroll" style={{ gridColumn: 'span 4', gridRow: 'span 2', padding: '3rem', borderRadius: '40px', textAlign: 'center', background: 'linear-gradient(135deg, rgba(99,102,241,0.1), transparent)' }}>
               <Layout size={50} color="var(--accent-purple)" style={{ marginBottom: '2rem' }}/>
               <h3 style={{ fontSize: '1.8rem', fontWeight: 900, marginBottom: '1.2rem' }}>Marca Blanca Pro</h3>
-              <p style={{ color: 'rgba(255,255,255,0.4)', lineHeight: 1.6 }}>No es nuestro software, es el tuyo. Personaliza logo y colores para una identidad propia de alto nivel.</p>
+              <p style={{ color: 'rgba(255,255,255,0.4)' }}>Personaliza logo y colores para una identidad propia de alto nivel.</p>
             </div>
-            {/* Stats Items */}
             <div className="bento-card reveal-on-scroll" style={{ gridColumn: 'span 4', padding: '2.5rem', borderRadius: '40px' }}>
               <Activity size={32} color="#10b981" style={{ marginBottom: '1rem' }}/>
               <div style={{ fontSize: '2rem', fontWeight: 900 }}><Counter end={99} suffix="%" /></div>
-              <div style={{ color: 'rgba(255,255,255,0.4)', fontWeight: 600 }}>Uptime Garantizado</div>
+              <div style={{ color: 'rgba(255,255,255,0.4)' }}>Uptime Garantizado</div>
             </div>
             <div className="bento-card reveal-on-scroll" style={{ gridColumn: 'span 4', padding: '2.5rem', borderRadius: '40px' }}>
               <Shield size={32} color="#6366f1" style={{ marginBottom: '1rem' }}/>
               <div style={{ fontSize: '2rem', fontWeight: 900 }}>AES-256</div>
-              <div style={{ color: 'rgba(255,255,255,0.4)', fontWeight: 600 }}>Cifrado Bancario</div>
+              <div style={{ color: 'rgba(255,255,255,0.4)' }}>Cifrado Bancario</div>
             </div>
             <div className="bento-card reveal-on-scroll" style={{ gridColumn: 'span 4', padding: '2.5rem', borderRadius: '40px' }}>
               <Users size={32} color="var(--accent-cyan)" style={{ marginBottom: '1rem' }}/>
               <div style={{ fontSize: '2rem', fontWeight: 900 }}><Counter end={100} suffix="K+" /></div>
-              <div style={{ color: 'rgba(255,255,255,0.4)', fontWeight: 600 }}>Citas Procesadas</div>
+              <div style={{ color: 'rgba(255,255,255,0.4)' }}>Citas Procesadas</div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* SEGURIDAD & CONFIANZA SECTION */}
-      <section style={{ padding: '80px 20px', background: 'rgba(255,255,255,0.02)' }}>
-        <div style={{ maxWidth: '1000px', margin: '0 auto', display: 'flex', flexWrap: 'wrap', gap: '3rem', justifyContent: 'center', alignItems: 'center' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
-             <Lock size={40} color="#10b981" />
-             <div>
-               <div style={{ fontWeight: 900, fontSize: '1.2rem' }}>Privacidad Total</div>
-               <div style={{ opacity: 0.5, fontSize: '0.9rem' }}>Cumplimiento con Ley de Datos</div>
-             </div>
-          </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
-             <Shield size={40} color="var(--accent-purple)" />
-             <div>
-               <div style={{ fontWeight: 900, fontSize: '1.2rem' }}>Pago Seguro</div>
-               <div style={{ opacity: 0.5, fontSize: '0.9rem' }}>Procesado por Stripe 3D Secure</div>
-             </div>
-          </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
-             <Zap size={40} color="var(--accent-cyan)" />
-             <div>
-               <div style={{ fontWeight: 900, fontSize: '1.2rem' }}>Ultra Veloz</div>
-               <div style={{ opacity: 0.5, fontSize: '0.9rem' }}>Infraestructura en la Nube AWS</div>
-             </div>
-          </div>
-        </div>
-      </section>
-
-      {/* TESTIMONIALS v3.0 */}
-      <section id="testimonios" style={{ padding: '120px 20px' }}>
+      {/* CUSTOM PRICING SECTION - REPLACING STRIPE TABLE */}
+      <section id="precios" style={{ padding: '140px 20px', background: 'radial-gradient(circle at 50% 50%, rgba(99,102,241,0.08), transparent 70%)' }}>
         <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
           <div className="reveal-on-scroll" style={{ textAlign: 'center', marginBottom: '6rem' }}>
-            <h2 style={{ fontSize: '3rem', fontWeight: 950, marginBottom: '1.2rem' }}>Líderes que confían en <span style={{ color: '#10b981' }}>nosotros.</span></h2>
+            <h2 style={{ fontSize: '4rem', fontWeight: 950, letterSpacing: '-px', marginBottom: '1.5rem' }}>Elegancia en <span style={{ color: 'var(--accent-purple)' }}>cada plan.</span></h2>
+            <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '1.3rem' }}>Sin sorpresas. Solo el poder que necesitas.</p>
           </div>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(350px, 1fr))', gap: '2.5rem' }}>
-            {[
-              { author: "Dr. Roberto M.", role: "Clínica Dental Premium", text: "ProNexusGlobal eliminó el caos de mi recepción. Mis ingresos crecieron 30% gracias al agendamiento automático." },
-              { author: "Lic. Andrea Ruiz", role: "Socia en Bufete Jurídico", text: "La estética de la plataforma es impecable. Mis clientes notan la diferencia en profesionalismo desde la primera cita." },
-              { author: "Coach Julián T.", role: "CEO High Performance", text: "Es la herramienta más potente que he usado para escalar mi práctica. Los recordatorios de WhatsApp son clave." }
-            ].map((t, i) => (
-              <div key={i} className="reveal-on-scroll" style={{ padding: '3rem', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: '35px', position: 'relative' }}>
-                <div style={{ position: 'absolute', top: '-20px', left: '3rem', background: 'linear-gradient(45deg, #6366f1, #a855f7)', padding: '12px', borderRadius: '15px' }}><Star size={20} fill="white" /></div>
-                <p style={{ fontSize: '1.2rem', lineHeight: 1.7, color: 'rgba(255,255,255,0.8)', marginBottom: '2.5rem' }}>"{t.text}"</p>
-                <div style={{ display: 'flex', gap: '15px', alignItems: 'center' }}>
-                  <div style={{ width: 60, height: 60, borderRadius: '20px', background: 'rgba(255,255,255,0.05)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.5rem', fontWeight: 900 }}>{t.author[0]}</div>
-                  <div>
-                    <div style={{ fontWeight: 900, fontSize: '1.1rem' }}>{t.author}</div>
-                    <div style={{ opacity: 0.5, fontSize: '0.85rem', fontWeight: 600 }}>{t.role}</div>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
 
-      {/* PRICING TABLE */}
-      <section id="precios" style={{ padding: '120px 20px', background: 'radial-gradient(circle at 50% 50%, rgba(99,102,241,0.08), transparent 70%)' }}>
-        <div className="reveal-on-scroll" style={{ maxWidth: '1000px', margin: '0 auto', textAlign: 'center' }}>
-          <h2 style={{ fontSize: '4rem', fontWeight: 950, marginBottom: '4rem', letterSpacing: '-3px' }}>Da el paso a la <span style={{ color: 'var(--accent-purple)' }}>grandeza.</span></h2>
-          
-          <div style={{ 
-            background: 'white', 
-            padding: '2rem', 
-            borderRadius: '40px', 
-            boxShadow: '0 40px 100px rgba(0,0,0,0.6)',
-            position: 'relative',
-            overflow: 'hidden'
-          }}>
-            {/* Badge para suavizar el contraste */}
-            <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '8px', background: 'linear-gradient(to right, #6366f1, #a855f7)' }}></div>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(12, 1fr)', gap: '30px', alignItems: 'center' }}>
+            <PricingCard 
+              title="Plan Básico"
+              price="299"
+              description="Ideal para profesionistas independientes."
+              accent="var(--accent-cyan)"
+              highlighted={false}
+              buttonText="Activar Básico"
+              waMessage="Hola, me interesa activar el Plan Básico de ProNexusGlobal para mi negocio."
+              features={[
+                "Hasta 50 clientes",
+                "Agenda de citas web",
+                "Panel de estadísticas básico",
+                "Soporte por correo electrónico",
+                "Marca blanca parcial"
+              ]}
+            />
             
-            <p style={{ color: '#64748b', fontSize: '0.9rem', fontWeight: 600, marginBottom: '2rem' }}>
-              <Shield size={14} style={{ verticalAlign: 'middle', marginRight: '6px' }} /> 
-              Planes Flexibles en Pesos Mexicanos (MXN)
-            </p>
-
-            <stripe-pricing-table
-              pricing-table-id="prctbl_1TKmNeRzHRtT8e1b7CUMp6tx"
-              publishable-key="pk_test_51TKlBcRzHRtT8e1byh4GMNN27g3iPpEX4MD6gIUFWCYEH7CkYQhQYQVYJcNno1M5FGWXIjJx5UsvWCIQj5dOPDCk00xMl03wSR"
-            ></stripe-pricing-table>
+            <PricingCard 
+              title="Plan Pro"
+              price="599"
+              description="Para expertos que no aceptan límites."
+              accent="var(--accent-purple)"
+              highlighted={true}
+              buttonText="¡Activar Pro Ahora!"
+              waMessage="Hola, me interesa activar el Plan Pro Élite de ProNexusGlobal. Quiero todas las funciones sin límites."
+              features={[
+                "Clientes ilimitados",
+                "Agenda avanzada 'Modo Dios'",
+                "Reportes de ingresos pro",
+                "Múltiples sucursales",
+                "Soporte prioritario 24/7",
+                "Marca blanca TOTAL"
+              ]}
+            />
           </div>
         </div>
       </section>
 
-      {/* FOOTER v3.0 */}
+      {/* FOOTER v4.0 */}
       <footer style={{ padding: '120px 20px 60px', borderTop: '1px solid rgba(255,255,255,0.05)', background: '#03050a' }}>
         <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '4rem', marginBottom: '6rem' }}>
@@ -345,20 +360,20 @@ const LandingPage = () => {
                 <Zap size={30} color="#6366f1" fill="#6366f1" />
                 <span style={{ fontSize: '1.8rem', fontWeight: 950 }}>ProNexusGlobal</span>
               </div>
-              <p style={{ color: 'rgba(255,255,255,0.3)', lineHeight: 1.8, fontSize: '1.1rem' }}>Elevando el estándar de la gestión profesional a nivel mundial. Inteligencia, diseño y seguridad.</p>
+              <p style={{ color: 'rgba(255,255,255,0.3)', lineHeight: 1.8 }}>Elevando el estándar de la gestión profesional a nivel mundial. Inteligencia, diseño y seguridad.</p>
+              
+              {/* SOCIAL ICONS */}
+              <div style={{ display: 'flex', gap: '15px', marginTop: '2.5rem' }}>
+                <a href="#" style={{ color: 'rgba(255,255,255,0.4)', transition: 'all 0.3s' }} onMouseEnter={e => e.currentTarget.style.color = '#1877F2'} onMouseLeave={e => e.currentTarget.style.color = 'rgba(255,255,255,0.4)'}><Facebook size={24}/></a>
+                <a href="#" style={{ color: 'rgba(255,255,255,0.4)', transition: 'all 0.3s' }} onMouseEnter={e => e.currentTarget.style.color = '#E4405F'} onMouseLeave={e => e.currentTarget.style.color = 'rgba(255,255,255,0.4)'}><Instagram size={24}/></a>
+                <a href="#" style={{ color: 'rgba(255,255,255,0.4)', transition: 'all 0.3s' }} onMouseEnter={e => e.currentTarget.style.color = '#0A66C2'} onMouseLeave={e => e.currentTarget.style.color = 'rgba(255,255,255,0.4)'}><Linkedin size={24}/></a>
+                <a href="#" style={{ color: 'rgba(255,255,255,0.4)', transition: 'all 0.3s' }} onMouseEnter={e => e.currentTarget.style.color = '#1DA1F2'} onMouseLeave={e => e.currentTarget.style.color = 'rgba(255,255,255,0.4)'}><Twitter size={24}/></a>
+              </div>
             </div>
-            <div>
-              <h4 style={{ marginBottom: '2rem', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '2px', fontSize: '0.9rem' }}>Compañía</h4>
-              <nav style={{ display: 'flex', flexDirection: 'column', gap: '1.2rem', color: 'rgba(255,255,255,0.6)', fontWeight: 600 }}>
-                <a href="#" style={{ color: 'inherit', textDecoration: 'none' }}>Sobre Nosotros</a>
-                <a href="#" style={{ color: 'inherit', textDecoration: 'none' }}>Blog</a>
-                <a href="#" style={{ color: 'inherit', textDecoration: 'none' }}>Contacto</a>
-                <a href="#" style={{ color: 'inherit', textDecoration: 'none' }}>Soporte</a>
-              </nav>
-            </div>
+            
             <div>
               <h4 style={{ marginBottom: '2rem', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '2px', fontSize: '0.9rem' }}>Ubicación & Soporte</h4>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', color: 'rgba(255,255,255,0.7)', fontWeight: 500 }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', color: 'rgba(255,255,255,0.7)' }}>
                 <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}><Mail size={16} color="var(--accent-cyan)" /> support@pronexusglobal.com</div>
                 <div style={{ display: 'flex', gap: '12px', alignItems: 'flex-start' }}>
                   <MapPin size={18} color="var(--accent-cyan)" style={{ marginTop: '4px', flexShrink: 0 }} /> 
@@ -367,12 +382,13 @@ const LandingPage = () => {
                 <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}><Phone size={16} color="var(--accent-cyan)" /> +52 (55) 1234-5678</div>
               </div>
             </div>
+
             <div>
               <h4 style={{ marginBottom: '2rem', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '2px', fontSize: '0.9rem' }}>Newsletter</h4>
               <p style={{ color: 'rgba(255,255,255,0.3)', marginBottom: '1.5rem', fontSize: '0.95rem' }}>Recibe tips de gestión y actualizaciones semanales.</p>
               <div style={{ display: 'flex', gap: '10px' }}>
-                <input type="email" placeholder="Email" style={{ flex: 1, background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '15px', padding: '14px', color: 'white', fontWeight: 600 }} />
-                <button style={{ background: 'white', color: 'black', borderRadius: '15px', padding: '0 25px', fontWeight: 900, border: 'none', cursor: 'pointer' }}>OK</button>
+                <input type="email" placeholder="Email" style={{ flex: 1, background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '15px', padding: '14px', color: 'white' }} />
+                <button style={{ background: 'white', color: 'black', borderRadius: '15px', padding: '0 25px', fontWeight: 900, border: 'none' }}>OK</button>
               </div>
             </div>
           </div>
@@ -393,12 +409,5 @@ const LandingPage = () => {
     </div>
   );
 };
-
-// Icono faltante
-const Briefcase = ({ size = 24, color = "currentColor" }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <rect width="20" height="14" x="2" y="7" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/>
-  </svg>
-);
 
 export default LandingPage;
