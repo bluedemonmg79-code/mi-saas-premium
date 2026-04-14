@@ -8,6 +8,7 @@ import { useToast } from '../context/ToastContext';
 function SettingsView() {
   const navigate = useNavigate();
   const { config, currentNiche, userProfile } = useOutletContext();
+  const isPremium = userProfile?.subscription_status === 'active';
   const [saved, setSaved] = useState(false);
   const [form, setForm] = useState({
     businessName: config.appName,
