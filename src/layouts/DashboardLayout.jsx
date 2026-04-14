@@ -8,23 +8,111 @@ import { NICHES } from '../config/nicheConfig';
 import { useAuth } from '../context/AuthContext';
 import { supabase } from '../lib/supabase';
 
+// Novedad: Componente de Pantalla de Bienvenida (Onboarding)
+function OnboardingView({ user, onComplete }) {
+  const [saving, setSaving] = useState(null);
+
+  const handleSelect = async (nicheKey) => {
+    setSaving(nicheKey);
+    try {
+      await supabase.from('profiles').upsert({ id: user.id, niche: nicheKey });
+      onComplete(); // Tells DashboardLayout to fetchProfile again!
+    } catch(err) {
+      console.error(err);
+      setSaving(null);
+    }
+  };
+
+  return (
+    <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: '#0f172a', color: 'white', padding: '2rem' }}>
+      <div style={{ maxWidth: '1000px', width: '100%', textAlign: 'center' }}>
+        <h1 style={{ fontSize: '2.5rem', marginBottom: '1rem', background: 'linear-gradient(135deg, #a855f7, #6366f1)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
+          Bienvenido a ProNexusGlobal
+        </h1>
+        <p style={{ color: 'rgba(255,255,255,0.6)', fontSize: '1.2rem', marginBottom: '3rem' }}>
+          Para configurar tu plataforma, por favor selecciona la especialidad de tu negocio.
+        </p>
+        
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1.5rem' }}>
+          {Object.entries(NICHES).map(([key, config]) => {
+             return (
+               <button 
+                 key={key}
+                 onClick={() => handleSelect(key)}
+                 disabled={saving !== null}
+                 style={{
+                   background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.1)',
+                   padding: '2rem', borderRadius: '16px', display: 'flex', flexDirection: 'column',
+                   alignItems: 'center', gap: '1rem', cursor: 'pointer', transition: 'all 0.3s',
+                   opacity: saving && saving !== key ? 0.3 : 1
+                 }}
+                 onMouseEnter={e => {
+                   if (!saving) {
+                     e.currentTarget.style.transform = 'translateY(-5px)';
+                     e.currentTarget.style.borderColor = config.primaryColor;
+                     e.currentTarget.style.background = 'rgba(255,255,255,0.08)';
+                   }
+                 }}
+                 onMouseLeave={e => {
+                   if (!saving) {
+                     e.currentTarget.style.transform = 'translateY(0)';
+                     e.currentTarget.style.borderColor = 'rgba(255,255,255,0.1)';
+                     e.currentTarget.style.background = 'rgba(255,255,255,0.03)';
+                   }
+                 }}
+               >
+                 <div style={{ width: '60px', height: '60px', borderRadius: '50%', background: `linear-gradient(135deg, ${config.primaryColor}22, ${config.secondaryColor}22)`, border: `1px solid ${config.primaryColor}`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                   {
+                     key === 'health' ? <Activity size={28} color={config.primaryColor} /> :
+                     key === 'medicine' ? <HeartPulse size={28} color={config.primaryColor} /> :
+                     key === 'legal' ? <Scale size={28} color={config.primaryColor} /> :
+                     key === 'fitness' ? <Dumbbell size={28} color={config.primaryColor} /> :
+                     <Building size={28} color={config.primaryColor} />
+                   }
+                 </div>
+                 <h3 style={{ margin: 0, fontSize: '1.1rem', color: 'white' }}>{config.appName}</h3>
+                 <span style={{ fontSize: '0.85rem', color: 'rgba(255,255,255,0.5)' }}>
+                   Modo {key === 'health' ? 'Dentista' : key === 'medicine' ? 'Medicina' : key === 'legal' ? 'Abogado' : key === 'fitness' ? 'Fitness' : 'Arquitecto'}
+                 </span>
+                 {saving === key && <div style={{ width: 16, height: 16, border: `2px solid ${config.primaryColor}`, borderTopColor: 'transparent', borderRadius: '50%', animation: 'spin 1s linear infinite' }} />}
+               </button>
+             )
+          })}
+        </div>
+        <style>{`@keyframes spin { to { transform: rotate(360deg) } }`}</style>
+      </div>
+    </div>
+  )
+}
+
 function DashboardLayout({ currentNiche, setCurrentNiche }) {
   const config = NICHES[currentNiche];
   const { logout, user } = useAuth();
   const navigate = useNavigate();
   const [logoUrl, setLogoUrl] = useState(null);
   const [userProfile, setUserProfile] = useState(null);
+  
+  // Novedad: Control de carga visual
+  const [isInitialLoading, setIsInitialLoading] = useState(true);
   const isPremium = userProfile?.subscription_status === 'active';
 
-  useEffect(() => {
-    const fetchProfile = async () => {
-      if (!user) return;
-      const { data } = await supabase.from('profiles').select('*').eq('id', user.id).single();
-      if (data) {
-        setUserProfile(data);
-        if (data.logo_url) setLogoUrl(data.logo_url);
+  const fetchProfile = async () => {
+    if (!user) {
+      setIsInitialLoading(false);
+      return;
+    }
+    const { data } = await supabase.from('profiles').select('*').eq('id', user.id).single();
+    if (data) {
+      setUserProfile(data);
+      if (data.logo_url) setLogoUrl(data.logo_url);
+      if (data.niche) {
+        setCurrentNiche(data.niche);
       }
-    };
+    }
+    setIsInitialLoading(false);
+  };
+
+  useEffect(() => {
     fetchProfile();
   }, [user]);
 
@@ -35,6 +123,22 @@ function DashboardLayout({ currentNiche, setCurrentNiche }) {
       navigate('/dashboard/entities?add=true');
     }
   };
+
+  // Novedad: Interceptador de Carga
+  if (isInitialLoading) {
+    return (
+      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#0f172a', color: 'rgba(255,255,255,0.4)', gap: '12px' }}>
+        <div style={{ width: 20, height: 20, border: '2px solid rgba(99,102,241,0.3)', borderTopColor: '#6366f1', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
+        Comprobando credenciales...
+        <style>{`@keyframes spin { to { transform: rotate(360deg) } }`}</style>
+      </div>
+    );
+  }
+
+  // Novedad: Intercepción de Onboarding para Nuevos Usuarios (SIN PERFIL O SIN NICHO)
+  if (!userProfile || !userProfile.niche) {
+    return <OnboardingView user={user} onComplete={fetchProfile} />;
+  }
 
   // Variables inyectadas de UI
   const themeStyles = {
@@ -128,21 +232,8 @@ function DashboardLayout({ currentNiche, setCurrentNiche }) {
           </div>
           <div className="header-actions">
             
-            {/* TRAYECTO DE DESARROLLO: SELECTOR DE NICHOS */}
-            <div className="niche-selector">
-              <select 
-                value={currentNiche} 
-                onChange={(e) => setCurrentNiche(e.target.value)}
-                className="niche-dropdown"
-              >
-                <option value="health">Modo Dentista</option>
-                <option value="medicine">Modo Medicina General</option>
-                <option value="legal">Modo Abogado</option>
-                <option value="fitness">Modo Gimnasio</option>
-                <option value="realestate">Modo Arquitecto</option>
-              </select>
-            </div>
-
+            {/* HEMOS ELIMINADO EL DROPDOWN DEL NICHO, AHORA ES PURO Y LIMPIO */}
+            
             <button onClick={handleNewAction} className="btn-primary">
               <Plus size={18} /> {config.labels.newAction}
             </button>

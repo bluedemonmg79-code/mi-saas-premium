@@ -104,7 +104,10 @@ function SettingsView() {
       }
       setSaved(true);
       toast.success('Configuración guardada en la nube');
-      setTimeout(() => setSaved(false), 2500);
+      setTimeout(() => {
+        setSaved(false);
+        window.location.reload(); // Recarga la página para bloquear el selector de nicho instantáneamente
+      }, 1500);
     } catch (error) {
       toast.error('Error guardando configuración: ' + error.message);
     }
