@@ -1,0 +1,116 @@
+{
+  "nav": {
+    "features": "Funciones",
+    "testimonials": "Testimonios",
+    "pricing": "Precios",
+    "login": "Entrar"
+  },
+  "hero": {
+    "badge": "Lanzamiento Oficial — Elite v4.0",
+    "title_part1": "Gestiona tu éxito",
+    "title_part2": "Sin límites.",
+    "description": "La plataforma definitiva para profesionales de élite. Agendamiento inteligente, gestión de clientes y marca blanca total.",
+    "cta_primary": "Empezar Gratis",
+    "cta_secondary": "Ver funciones",
+    "stats_label": "Profesionales Activos"
+  },
+  "marquee": {
+    "dental": "DENTI-MAX",
+    "legal": "LEGAL-CORE",
+    "coach": "COACH-PRO",
+    "briefcase": "EXPERT-HUB"
+  },
+  "features": {
+    "title_part1": "Poder absoluto en",
+    "title_part2": "tus manos.",
+    "description": "Diseñamos cada función para ahorrarte tiempo y elevar tu marca personal.",
+    "agenda_title": "Agenda Inteligente 🏛️",
+    "agenda_desc": "Tu link público detecta espacios libres y bloquea choques automáticamente.",
+    "agenda_save": "Ahorra hasta {{count}} horas a la semana.",
+    "white_label_title": "Marca Blanca Pro",
+    "white_label_desc": "Personaliza logo y colores para una identidad propia de alto nivel.",
+    "uptime_title": "Uptime Garantizado",
+    "security_title": "Cifrado Bancario",
+    "processed_title": "Citas Procesadas"
+  },
+  "pricing": {
+    "title_part1": "Elegancia en",
+    "title_part2": "cada plan.",
+    "subtitle": "Sin sorpresas. Solo el poder que necesitas.",
+    "basic": {
+      "title": "Plan Básico",
+      "desc": "Ideal para profesionistas independientes.",
+      "button": "Activar Básico",
+      "wa_message": "Hola, me interesa activar el Plan Básico de ProNexusGlobal para mi negocio.",
+      "f1": "Hasta 50 clientes",
+      "f2": "Agenda de citas web",
+      "f3": "Panel de estadísticas básico",
+      "f4": "Soporte por correo electrónico",
+      "f5": "Marca blanca parcial"
+    },
+    "pro": {
+      "title": "Plan Pro",
+      "desc": "Para expertos que no aceptan límites.",
+      "button": "¡Activar Pro Ahora!",
+      "wa_message": "Hola, me interesa activar el Plan Pro Élite de ProNexusGlobal. Quiero todas las funciones sin límites.",
+      "f1": "Clientes ilimitados",
+      "f2": "Agenda avanzada 'Modo Dios'",
+      "f3": "Reportes de ingresos pro",
+      "f4": "Múltiples sucursales",
+      "f5": "Soporte prioritario 24/7",
+      "f6": "Marca blanca TOTAL"
+    }
+  },
+  "testimonials": {
+    "title_part1": "Líderes que confían en",
+    "title_part2": "nosotros.",
+    "t1": {
+      "text": "ProNexusGlobal eliminó el caos de mi recepción. Mis ingresos crecieron 30% gracias al agendamiento automático.",
+      "author": "Dr. Roberto M.",
+      "role": "Clínica Dental Premium"
+    },
+    "t2": {
+      "text": "La estética de la plataforma es impecable. Mis clientes notan la diferencia en profesionalismo desde la primera cita.",
+      "author": "Lic. Andrea Ruiz",
+      "role": "Socia en Bufete Jurídico"
+    },
+    "t3": {
+      "text": "Es la herramienta más potente que he usado para escalar mi práctica. Los recordatorios de WhatsApp son clave.",
+      "author": "Coach Julián T.",
+      "role": "CEO High Performance"
+    }
+  },
+  "footer": {
+    "slogan": "Elevando el estándar de la gestión profesional a nivel mundial. Inteligencia, diseño y seguridad.",
+    "company": "Compañía",
+    "about": "Sobre Nosotros",
+    "contact": "Contacto",
+    "support": "Soporte",
+    "location_title": "Ubicación & Soporte",
+    "location_desc": "Av. Paseo de la Reforma 222, Piso 12, Cuauhtémoc, CDMX, 06600",
+    "newsletter": "Newsletter",
+    "newsletter_desc": "Recibe tips de gestión y actualizaciones semanales.",
+    "rights": "© {{year}} ProNexusGlobal. Todas las marcas registradas. Proceso de calidad certificado."
+  },
+  "booking": {
+    "error_not_available": "Este profesional no tiene habilitado el agendamiento público o no existe.",
+    "step1_title": "Selecciona Fecha y Hora",
+    "label_date": "Fecha",
+    "label_time": "Horarios Disponibles",
+    "occupied": "OCUPADO",
+    "btn_continue": "Continuar",
+    "step2_title": "Completa tus Datos",
+    "label_name": "Nombre Completo",
+    "placeholder_name": "Ej. Juan Pérez",
+    "label_email": "Correo Electrónico",
+    "placeholder_email": "juan@ejemplo.com",
+    "label_phone": "Teléfono de Contacto",
+    "placeholder_phone": "55 1234 5678",
+    "summary": "Reserva para el {{date}} a las {{time}}",
+    "btn_confirm": "Confirmar Solicitud",
+    "btn_booking_loading": "Agendando...",
+    "step3_title": "¡Solicitud Enviada!",
+    "step3_desc": "Tu cita ha sido registrada. El profesional revisará tu solicitud y se pondrá en contacto contigo pronto.",
+    "btn_back": "Regresar"
+  }
+}

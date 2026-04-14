@@ -1,0 +1,116 @@
+{
+  "nav": {
+    "features": "Features",
+    "testimonials": "Testimonials",
+    "pricing": "Pricing",
+    "login": "Login"
+  },
+  "hero": {
+    "badge": "Official Launch — Elite v4.0",
+    "title_part1": "Manage your success",
+    "title_part2": "Without limits.",
+    "description": "The ultimate platform for elite professionals. Intelligent scheduling, client management, and full white-labeling.",
+    "cta_primary": "Start for Free",
+    "cta_secondary": "View Features",
+    "stats_label": "Active Professionals"
+  },
+  "marquee": {
+    "dental": "DENTI-MAX",
+    "legal": "LEGAL-CORE",
+    "coach": "COACH-PRO",
+    "briefcase": "EXPERT-HUB"
+  },
+  "features": {
+    "title_part1": "Absolute power in",
+    "title_part2": "your hands.",
+    "description": "We design every feature to save you time and elevate your personal brand.",
+    "agenda_title": "Intelligent Agenda 🏛️",
+    "agenda_desc": "Your public link detects free spots and blocks clashes automatically.",
+    "agenda_save": "Save up to {{count}} hours per week.",
+    "white_label_title": "Pro White Label",
+    "white_label_desc": "Customize logo and colors for a high-level corporate identity.",
+    "uptime_title": "Guaranteed Uptime",
+    "security_title": "Banking Encryption",
+    "processed_title": "Processed Bookings"
+  },
+  "pricing": {
+    "title_part1": "Elegance in",
+    "title_part2": "every plan.",
+    "subtitle": "No surprises. Just the power you need.",
+    "basic": {
+      "title": "Basic Plan",
+      "desc": "Ideal for independent professionals.",
+      "button": "Activate Basic",
+      "wa_message": "Hi, I'm interested in activating the Basic Plan of ProNexusGlobal for my business.",
+      "f1": "Up to 50 clients",
+      "f2": "Web booking agenda",
+      "f3": "Basic statistics panel",
+      "f4": "Email support",
+      "f5": "Partial white labeling"
+    },
+    "pro": {
+      "title": "Pro Plan",
+      "desc": "For experts who accept no limits.",
+      "button": "Activate Pro Now!",
+      "wa_message": "Hi, I'm interested in activating the Pro Elite Plan of ProNexusGlobal. I want all features without limits.",
+      "f1": "Unlimited clients",
+      "f2": "Advanced 'God Mode' Agenda",
+      "f3": "Pro revenue reports",
+      "f4": "Multiple branches",
+      "f5": "24/7 Priority support",
+      "f6": "FULL white labeling"
+    }
+  },
+  "testimonials": {
+    "title_part1": "Leaders who trust in",
+    "title_part2": "us.",
+    "t1": {
+      "text": "ProNexusGlobal removed the chaos from my reception. My revenue grew 30% thanks to the automatic scheduling.",
+      "author": "Dr. Roberto M.",
+      "role": "Premium Dental Clinic"
+    },
+    "t2": {
+      "text": "The platform's aesthetics are impeccable. My clients notice the difference in professionalism from the first appointment.",
+      "author": "Andrea Ruiz, JD",
+      "role": "Corporate Law Partner"
+    },
+    "t3": {
+      "text": "It's the most powerful tool I've used to scale my practice. WhatsApp reminders are key.",
+      "author": "Coach Julian T.",
+      "role": "High Performance CEO"
+    }
+  },
+  "footer": {
+    "slogan": "Elevating the standard of professional management worldwide. Intelligence, design, and security.",
+    "company": "Company",
+    "about": "About Us",
+    "contact": "Contact",
+    "support": "Support",
+    "location_title": "Location & Support",
+    "location_desc": "Av. Paseo de la Reforma 222, 12th Floor, Cuauhtemoc, CDMX, 06600",
+    "newsletter": "Newsletter",
+    "newsletter_desc": "Receive management tips and weekly updates.",
+    "rights": "© {{year}} ProNexusGlobal. All rights reserved. Certified quality process."
+  },
+  "booking": {
+    "error_not_available": "This professional does not have public booking enabled or does not exist.",
+    "step1_title": "Select Date and Time",
+    "label_date": "Date",
+    "label_time": "Available Slots",
+    "occupied": "OCCUPIED",
+    "btn_continue": "Continue",
+    "step2_title": "Complete Your Details",
+    "label_name": "Full Name",
+    "placeholder_name": "e.g., John Doe",
+    "label_email": "Email Address",
+    "placeholder_email": "john@example.com",
+    "label_phone": "Contact Phone",
+    "placeholder_phone": "55 1234 5678",
+    "summary": "Booking for {{date}} at {{time}}",
+    "btn_confirm": "Confirm Request",
+    "btn_booking_loading": "Booking...",
+    "step3_title": "Request Sent!",
+    "step3_desc": "Your appointment has been registered. The professional will review your request and contact you soon.",
+    "btn_back": "Go Back"
+  }
+}

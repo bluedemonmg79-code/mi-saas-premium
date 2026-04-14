@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { 
   Zap, 
   Shield, 
@@ -85,7 +86,7 @@ const PricingCard = ({ title, price, description, features, accent, highlighted,
         <div style={{ 
           position: 'absolute', top: '-15px', right: '2rem', background: accent, 
           padding: '6px 16px', borderRadius: '30px', fontSize: '0.75rem', fontWeight: 900,
-          boxShadow: `0 0 20px ${accent}`
+          boxShadow: `0 0 20px ${accent}`, color: 'white'
         }}>
           POPULAR
         </div>
@@ -99,7 +100,7 @@ const PricingCard = ({ title, price, description, features, accent, highlighted,
       <div style={{ marginBottom: '3rem' }}>
         <div style={{ display: 'flex', alignItems: 'baseline', gap: '8px' }}>
           <span style={{ fontSize: '3rem', fontWeight: 950 }}>MX${price}</span>
-          <span style={{ color: 'rgba(255,255,255,0.3)', fontWeight: 600 }}>/mes</span>
+          <span style={{ color: 'rgba(255,255,255,0.3)', fontWeight: 600 }}>/mo</span>
         </div>
       </div>
 
@@ -134,8 +135,44 @@ const PricingCard = ({ title, price, description, features, accent, highlighted,
   );
 };
 
+const LanguageSwitcher = () => {
+  const { i18n } = useTranslation();
+  const currentLang = i18n.language.split('-')[0];
+
+  const toggleLanguage = () => {
+    const nextLang = currentLang === 'es' ? 'en' : 'es';
+    i18n.changeLanguage(nextLang);
+  };
+
+  return (
+    <button 
+      onClick={toggleLanguage}
+      style={{
+        background: 'rgba(255,255,255,0.05)',
+        border: '1px solid rgba(255,255,255,0.1)',
+        padding: '8px 14px',
+        borderRadius: '12px',
+        color: 'white',
+        cursor: 'pointer',
+        display: 'flex',
+        alignItems: 'center',
+        gap: '8px',
+        fontSize: '0.85rem',
+        fontWeight: 800,
+        transition: 'all 0.3s'
+      }}
+      onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,255,255,0.1)'}
+      onMouseLeave={e => e.currentTarget.style.background = 'rgba(255,255,255,0.05)'}
+    >
+      <Globe size={14} />
+      {currentLang.toUpperCase()}
+    </button>
+  );
+};
+
 const LandingPage = () => {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const [scrolled, setScrolled] = useState(false);
   
   useEffect(() => {
@@ -195,16 +232,19 @@ const LandingPage = () => {
         </div>
         
         <div style={{ display: 'flex', gap: '2.5rem', alignItems: 'center' }}>
-          {['Funciones', 'Testimonios', 'Precios'].map(item => (
-            <a key={item} href={`#${item === 'Funciones' ? 'features' : item.toLowerCase()}`} style={{ color: 'rgba(255,255,255,0.6)', textDecoration: 'none', fontSize: '0.9rem', fontWeight: 600, transition: 'all 0.3s' }}>
-              {item}
-            </a>
-          ))}
+          <div className="nav-links" style={{ display: 'flex', gap: '2.5rem', alignItems: 'center' }}>
+            <a href="#features" style={{ color: 'rgba(255,255,255,0.6)', textDecoration: 'none', fontSize: '0.9rem', fontWeight: 600 }}>{t('nav.features')}</a>
+            <a href="#testimonials" style={{ color: 'rgba(255,255,255,0.6)', textDecoration: 'none', fontSize: '0.9rem', fontWeight: 600 }}>{t('nav.testimonials')}</a>
+            <a href="#precios" style={{ color: 'rgba(255,255,255,0.6)', textDecoration: 'none', fontSize: '0.9rem', fontWeight: 600 }}>{t('nav.pricing')}</a>
+          </div>
+          
+          <LanguageSwitcher />
+
           <Link to="/login" style={{ 
             padding: '12px 28px', borderRadius: '14px', background: 'white', color: '#070a14', 
             textDecoration: 'none', fontSize: '0.95rem', fontWeight: 800
           }}>
-            Entrar
+            {t('nav.login')}
           </Link>
         </div>
       </nav>
@@ -217,18 +257,18 @@ const LandingPage = () => {
             border: '1px solid rgba(255, 255, 255, 0.08)', padding: '8px 20px', borderRadius: '30px', 
             marginBottom: '3rem', color: 'rgba(255,255,255,0.7)', fontSize: '0.9rem', fontWeight: 600
           }}>
-            <Sparkles size={16} color="var(--accent-cyan)" /> <span style={{ color: 'white' }}>Lanzamiento Oficial</span> — Elite v4.0
+            <Sparkles size={16} color="var(--accent-cyan)" /> <span style={{ color: 'white' }}>{t('hero.badge')}</span>
           </div>
           
           <h1 style={{ fontSize: 'max(4rem, 7vw)', fontWeight: 950, lineHeight: 0.95, letterSpacing: '-4px', marginBottom: '2.5rem' }} className="glow-text">
-            Gestiona tu éxito <br/>
+            {t('hero.title_part1')} <br/>
             <span style={{ background: 'linear-gradient(to right, #6366f1, #a855f7)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
-              Sin límites.
+              {t('hero.title_part2')}
             </span>
           </h1>
           
           <p style={{ fontSize: '1.4rem', color: 'rgba(255,255,255,0.5)', maxWidth: '800px', margin: '0 auto 4.5rem', lineHeight: 1.5 }}>
-            La plataforma definitiva para profesionales de élite. Agendamiento inteligente, gestión de clientes y marca blanca total.
+            {t('hero.description')}
           </p>
 
           <div style={{ display: 'flex', gap: '1.5rem', justifyContent: 'center', marginBottom: '8rem' }}>
@@ -236,13 +276,13 @@ const LandingPage = () => {
               padding: '20px 50px', background: 'white', color: '#000', borderRadius: '20px', 
               fontSize: '1.2rem', fontWeight: 900, textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '12px'
             }}>
-              Empezar Gratis <ArrowRight size={22} />
+              {t('hero.cta_primary')} <ArrowRight size={22} />
             </Link>
             <a href="#features" style={{ 
               padding: '20px 50px', background: 'rgba(255,255,255,0.03)', color: 'white', 
               borderRadius: '20px', fontSize: '1.2rem', fontWeight: 700, textDecoration: 'none', 
               border: '1px solid rgba(255,255,255,0.1)'
-            }}>Ver funciones</a>
+            }}>{t('hero.cta_secondary')}</a>
           </div>
 
           <div style={{ position: 'relative' }}>
@@ -262,7 +302,7 @@ const LandingPage = () => {
         <div style={{ display: 'flex', width: '200%', animation: 'marquee 40s linear infinite', gap: '150px', alignItems: 'center', opacity: 0.25 }}>
           {[1,2,3,4,1,2,3,4].map((_, i) => (
             <div key={i} style={{ fontSize: '1.8rem', fontWeight: 950, display: 'flex', alignItems: 'center', gap: '20px' }}>
-              <Activity size={24}/> DENTI-MAX <Server size={24}/> LEGAL-CORE <Users size={24}/> COACH-PRO <Briefcase size={24}/> EXPERT-HUB
+              <Activity size={24}/> {t('marquee.dental')} <Server size={24}/> {t('marquee.legal')} <Users size={24}/> {t('marquee.coach')} <Briefcase size={24}/> {t('marquee.briefcase')}
             </div>
           ))}
         </div>
@@ -272,86 +312,115 @@ const LandingPage = () => {
       <section id="features" style={{ padding: '140px 20px' }}>
         <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
           <div className="reveal-on-scroll" style={{ textAlign: 'center', marginBottom: '6rem' }}>
-            <h2 style={{ fontSize: '4rem', fontWeight: 950, letterSpacing: '-3px', marginBottom: '1.5rem' }}>Poder absoluto en <span style={{ color: 'var(--accent-cyan)' }}>tus manos.</span></h2>
+            <h2 style={{ fontSize: '4rem', fontWeight: 950, letterSpacing: '-3px', marginBottom: '1.5rem' }}>{t('features.title_part1')} <span style={{ color: 'var(--accent-cyan)' }}>{t('features.title_part2')}</span></h2>
+            <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '1.2rem' }}>{t('features.description')}</p>
           </div>
 
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(12, 1fr)', gridAutoRows: 'minmax(220px, auto)', gap: '25px' }}>
             <div className="bento-card reveal-on-scroll" style={{ gridColumn: 'span 8', gridRow: 'span 2', padding: '3.5rem', borderRadius: '40px', display: 'flex', flexDirection: 'column', justifyContent: 'flex-end' }}>
-              <h3 style={{ fontSize: '2.5rem', fontWeight: 900, marginBottom: '1.5rem' }}>Agenda Inteligente 🏛️</h3>
-              <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: '1.1rem', maxWidth: '450px' }}>Tu link público detecta espacios libres y bloquea choques automáticamente. Ahorra hasta <Counter end={10} suffix=" horas" /> a la semana.</p>
+              <h3 style={{ fontSize: '2.5rem', fontWeight: 900, marginBottom: '1.5rem' }}>{t('features.agenda_title')}</h3>
+              <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: '1.1rem', maxWidth: '450px' }}>{t('features.agenda_desc')} {t('features.agenda_save', { count: 10 })}</p>
             </div>
             <div className="bento-card reveal-on-scroll" style={{ gridColumn: 'span 4', gridRow: 'span 2', padding: '3rem', borderRadius: '40px', textAlign: 'center', background: 'linear-gradient(135deg, rgba(99,102,241,0.1), transparent)' }}>
               <Layout size={50} color="var(--accent-purple)" style={{ marginBottom: '2rem' }}/>
-              <h3 style={{ fontSize: '1.8rem', fontWeight: 900, marginBottom: '1.2rem' }}>Marca Blanca Pro</h3>
-              <p style={{ color: 'rgba(255,255,255,0.4)' }}>Personaliza logo y colores para una identidad propia de alto nivel.</p>
+              <h3 style={{ fontSize: '1.8rem', fontWeight: 900, marginBottom: '1.2rem' }}>{t('features.white_label_title')}</h3>
+              <p style={{ color: 'rgba(255,255,255,0.4)' }}>{t('features.white_label_desc')}</p>
             </div>
             <div className="bento-card reveal-on-scroll" style={{ gridColumn: 'span 4', padding: '2.5rem', borderRadius: '40px' }}>
               <Activity size={32} color="#10b981" style={{ marginBottom: '1rem' }}/>
               <div style={{ fontSize: '2rem', fontWeight: 900 }}><Counter end={99} suffix="%" /></div>
-              <div style={{ color: 'rgba(255,255,255,0.4)' }}>Uptime Garantizado</div>
+              <div style={{ color: 'rgba(255,255,255,0.4)' }}>{t('features.uptime_title')}</div>
             </div>
             <div className="bento-card reveal-on-scroll" style={{ gridColumn: 'span 4', padding: '2.5rem', borderRadius: '40px' }}>
               <Shield size={32} color="#6366f1" style={{ marginBottom: '1rem' }}/>
               <div style={{ fontSize: '2rem', fontWeight: 900 }}>AES-256</div>
-              <div style={{ color: 'rgba(255,255,255,0.4)' }}>Cifrado Bancario</div>
+              <div style={{ color: 'rgba(255,255,255,0.4)' }}>{t('features.security_title')}</div>
             </div>
             <div className="bento-card reveal-on-scroll" style={{ gridColumn: 'span 4', padding: '2.5rem', borderRadius: '40px' }}>
               <Users size={32} color="var(--accent-cyan)" style={{ marginBottom: '1rem' }}/>
               <div style={{ fontSize: '2rem', fontWeight: 900 }}><Counter end={100} suffix="K+" /></div>
-              <div style={{ color: 'rgba(255,255,255,0.4)' }}>Citas Procesadas</div>
+              <div style={{ color: 'rgba(255,255,255,0.4)' }}>{t('features.processed_title')}</div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* CUSTOM PRICING SECTION - REPLACING STRIPE TABLE */}
+      {/* CUSTOM PRICING SECTION */}
       <section id="precios" style={{ padding: '140px 20px', background: 'radial-gradient(circle at 50% 50%, rgba(99,102,241,0.08), transparent 70%)' }}>
         <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
           <div className="reveal-on-scroll" style={{ textAlign: 'center', marginBottom: '6rem' }}>
-            <h2 style={{ fontSize: '4rem', fontWeight: 950, letterSpacing: '-px', marginBottom: '1.5rem' }}>Elegancia en <span style={{ color: 'var(--accent-purple)' }}>cada plan.</span></h2>
-            <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '1.3rem' }}>Sin sorpresas. Solo el poder que necesitas.</p>
+            <h2 style={{ fontSize: '4rem', fontWeight: 950, letterSpacing: '-px', marginBottom: '1.5rem' }}>{t('pricing.title_part1')} <span style={{ color: 'var(--accent-purple)' }}>{t('pricing.title_part2')}</span></h2>
+            <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '1.3rem' }}>{t('pricing.subtitle')}</p>
           </div>
 
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(12, 1fr)', gap: '30px', alignItems: 'center' }}>
             <PricingCard 
-              title="Plan Básico"
+              title={t('pricing.basic.title')}
               price="299"
-              description="Ideal para profesionistas independientes."
+              description={t('pricing.basic.desc')}
               accent="var(--accent-cyan)"
               highlighted={false}
-              buttonText="Activar Básico"
-              waMessage="Hola, me interesa activar el Plan Básico de ProNexusGlobal para mi negocio."
+              buttonText={t('pricing.basic.button')}
+              waMessage={t('pricing.basic.wa_message')}
               features={[
-                "Hasta 50 clientes",
-                "Agenda de citas web",
-                "Panel de estadísticas básico",
-                "Soporte por correo electrónico",
-                "Marca blanca parcial"
+                t('pricing.basic.f1'),
+                t('pricing.basic.f2'),
+                t('pricing.basic.f3'),
+                t('pricing.basic.f4'),
+                t('pricing.basic.f5')
               ]}
             />
             
             <PricingCard 
-              title="Plan Pro"
+              title={t('pricing.pro.title')}
               price="599"
-              description="Para expertos que no aceptan límites."
+              description={t('pricing.pro.desc')}
               accent="var(--accent-purple)"
               highlighted={true}
-              buttonText="¡Activar Pro Ahora!"
-              waMessage="Hola, me interesa activar el Plan Pro Élite de ProNexusGlobal. Quiero todas las funciones sin límites."
+              buttonText={t('pricing.pro.button')}
+              waMessage={t('pricing.pro.wa_message')}
               features={[
-                "Clientes ilimitados",
-                "Agenda avanzada 'Modo Dios'",
-                "Reportes de ingresos pro",
-                "Múltiples sucursales",
-                "Soporte prioritario 24/7",
-                "Marca blanca TOTAL"
+                t('pricing.pro.f1'),
+                t('pricing.pro.f2'),
+                t('pricing.pro.f3'),
+                t('pricing.pro.f4'),
+                t('pricing.pro.f5'),
+                t('pricing.pro.f6')
               ]}
             />
           </div>
         </div>
       </section>
 
-      {/* FOOTER v4.0 */}
+      {/* TESTIMONIALS */}
+      <section id="testimonials" style={{ padding: '140px 20px', borderTop: '1px solid rgba(255,255,255,0.05)' }}>
+        <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
+          <div className="reveal-on-scroll" style={{ textAlign: 'center', marginBottom: '6rem' }}>
+            <h2 style={{ fontSize: '4rem', fontWeight: 950, letterSpacing: '-px', marginBottom: '1.5rem' }}>{t('testimonials.title_part1')} <br/> <span style={{ color: 'var(--accent-cyan)' }}>{t('testimonials.title_part2')}</span></h2>
+          </div>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '30px' }}>
+            {[1,2,3].map(i => (
+              <div key={i} className="bento-card reveal-on-scroll" style={{ padding: '3rem', borderRadius: '40px' }}>
+                <div style={{ display: 'flex', gap: '5px', marginBottom: '1.5rem' }}>
+                  {[1,2,3,4,5].map(s => <Star key={s} size={16} fill="var(--accent-cyan)" color="var(--accent-cyan)" />)}
+                </div>
+                <p style={{ fontSize: '1.1rem', lineHeight: 1.6, marginBottom: '2rem', color: 'rgba(255,255,255,0.7)' }}>
+                  "{t(`testimonials.t${i}.text`)}"
+                </p>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
+                  <div style={{ width: '50px', height: '50px', background: 'rgba(255,255,255,0.1)', borderRadius: '50%' }}></div>
+                  <div>
+                    <h4 style={{ fontWeight: 900 }}>{t(`testimonials.t${i}.author`)}</h4>
+                    <p style={{ fontSize: '0.85rem', color: 'rgba(255,255,255,0.4)' }}>{t(`testimonials.t${i}.role`)}</p>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* FOOTER */}
       <footer style={{ padding: '120px 20px 60px', borderTop: '1px solid rgba(255,255,255,0.05)', background: '#03050a' }}>
         <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '4rem', marginBottom: '6rem' }}>
@@ -360,9 +429,8 @@ const LandingPage = () => {
                 <Zap size={30} color="#6366f1" fill="#6366f1" />
                 <span style={{ fontSize: '1.8rem', fontWeight: 950 }}>ProNexusGlobal</span>
               </div>
-              <p style={{ color: 'rgba(255,255,255,0.3)', lineHeight: 1.8 }}>Elevando el estándar de la gestión profesional a nivel mundial. Inteligencia, diseño y seguridad.</p>
+              <p style={{ color: 'rgba(255,255,255,0.3)', lineHeight: 1.8 }}>{t('footer.slogan')}</p>
               
-              {/* SOCIAL ICONS */}
               <div style={{ display: 'flex', gap: '15px', marginTop: '2.5rem' }}>
                 <a href="#" style={{ color: 'rgba(255,255,255,0.4)', transition: 'all 0.3s' }} onMouseEnter={e => e.currentTarget.style.color = '#1877F2'} onMouseLeave={e => e.currentTarget.style.color = 'rgba(255,255,255,0.4)'}><Facebook size={24}/></a>
                 <a href="#" style={{ color: 'rgba(255,255,255,0.4)', transition: 'all 0.3s' }} onMouseEnter={e => e.currentTarget.style.color = '#E4405F'} onMouseLeave={e => e.currentTarget.style.color = 'rgba(255,255,255,0.4)'}><Instagram size={24}/></a>
@@ -372,20 +440,30 @@ const LandingPage = () => {
             </div>
             
             <div>
-              <h4 style={{ marginBottom: '2rem', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '2px', fontSize: '0.9rem' }}>Ubicación & Soporte</h4>
+              <h4 style={{ marginBottom: '2rem', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '2px', fontSize: '0.9rem' }}>{t('footer.company')}</h4>
+              <nav style={{ display: 'flex', flexDirection: 'column', gap: '1.2rem', color: 'rgba(255,255,255,0.6)', fontWeight: 600 }}>
+                <a href="#" style={{ color: 'inherit', textDecoration: 'none' }}>{t('footer.about')}</a>
+                <a href="#" style={{ color: 'inherit', textDecoration: 'none' }}>Blog</a>
+                <a href="#" style={{ color: 'inherit', textDecoration: 'none' }}>{t('footer.contact')}</a>
+                <a href="#" style={{ color: 'inherit', textDecoration: 'none' }}>{t('footer.support')}</a>
+              </nav>
+            </div>
+
+            <div>
+              <h4 style={{ marginBottom: '2rem', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '2px', fontSize: '0.9rem' }}>{t('footer.location_title')}</h4>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', color: 'rgba(255,255,255,0.7)' }}>
                 <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}><Mail size={16} color="var(--accent-cyan)" /> support@pronexusglobal.com</div>
                 <div style={{ display: 'flex', gap: '12px', alignItems: 'flex-start' }}>
                   <MapPin size={18} color="var(--accent-cyan)" style={{ marginTop: '4px', flexShrink: 0 }} /> 
-                  <span style={{ lineHeight: 1.5 }}>Av. Paseo de la Reforma 222, Piso 12,<br/>Cuauhtémoc, CDMX, 06600</span>
+                  <span style={{ lineHeight: 1.5 }}>{t('footer.location_desc')}</span>
                 </div>
                 <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}><Phone size={16} color="var(--accent-cyan)" /> +52 (55) 1234-5678</div>
               </div>
             </div>
 
             <div>
-              <h4 style={{ marginBottom: '2rem', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '2px', fontSize: '0.9rem' }}>Newsletter</h4>
-              <p style={{ color: 'rgba(255,255,255,0.3)', marginBottom: '1.5rem', fontSize: '0.95rem' }}>Recibe tips de gestión y actualizaciones semanales.</p>
+              <h4 style={{ marginBottom: '2rem', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '2px', fontSize: '0.9rem' }}>{t('footer.newsletter')}</h4>
+              <p style={{ color: 'rgba(255,255,255,0.3)', marginBottom: '1.5rem', fontSize: '0.95rem' }}>{t('footer.newsletter_desc')}</p>
               <div style={{ display: 'flex', gap: '10px' }}>
                 <input type="email" placeholder="Email" style={{ flex: 1, background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '15px', padding: '14px', color: 'white' }} />
                 <button style={{ background: 'white', color: 'black', borderRadius: '15px', padding: '0 25px', fontWeight: 900, border: 'none' }}>OK</button>
@@ -393,7 +471,7 @@ const LandingPage = () => {
             </div>
           </div>
           <div style={{ textAlign: 'center', color: 'rgba(255,255,255,0.1)', fontSize: '0.9rem', paddingTop: '4rem', borderTop: '1px solid rgba(255,255,255,0.05)' }}>
-            © {new Date().getFullYear()} ProNexusGlobal. Todas las marcas registradas. Proceso de calidad certificado.
+            {t('footer.rights', { year: new Date().getFullYear() })}
           </div>
         </div>
       </footer>
