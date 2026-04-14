@@ -12,8 +12,10 @@ function PublicBooking() {
   const [step, setStep] = useState(1); // 1: Date/Time, 2: Form, 3: Success
   const [selectedDate, setSelectedDate] = useState('');
   const [selectedTime, setSelectedTime] = useState('');
+  const [bookedSlots, setBookedSlots] = useState([]);
   const [form, setForm] = useState({ name: '', email: '', phone: '' });
   const [booking, setBooking] = useState(false);
+  const [fetchingSlots, setFetchingSlots] = useState(false);
 
   useEffect(() => {
     const fetchProf = async () => {
@@ -36,6 +38,28 @@ function PublicBooking() {
     fetchProf();
   }, [username]);
 
+  // Nuevo Sensor: Escanear horarios ocupados cuando se elige una fecha
+  useEffect(() => {
+    const fetchBookedSlots = async () => {
+      if (!selectedDate || !prof) return;
+      setFetchingSlots(true);
+      try {
+        const { data } = await supabase
+          .from('appointments')
+          .select('time')
+          .eq('user_id', prof.id)
+          .eq('full_date', selectedDate);
+        
+        setBookedSlots(data?.map(d => d.time) || []);
+      } catch (err) {
+        console.error('Error fetching slots:', err);
+      } finally {
+        setFetchingSlots(false);
+      }
+    };
+    fetchBookedSlots();
+  }, [selectedDate, prof]);
+
   const niche = prof ? NICHES[prof.niche || 'medicine'] : null;
 
   const hours = ['09:00', '10:00', '11:00', '12:00', '13:00', '16:00', '17:00', '18:00'];
@@ -44,6 +68,23 @@ function PublicBooking() {
     e.preventDefault();
     setBooking(true);
     try {
+      // Doble Verificación de Seguridad: ¿Se ocupó el lugar en el último segundo?
+      const { data: clash } = await supabase
+        .from('appointments')
+        .select('id')
+        .eq('user_id', prof.id)
+        .eq('full_date', selectedDate)
+        .eq('time', selectedTime)
+        .single();
+      
+      if (clash) {
+        alert('¡Vaya! Alguien acaba de ganar este horario hace un instante. Por favor elige otro.');
+        setBookedSlots([...bookedSlots, selectedTime]);
+        setSelectedTime('');
+        setStep(1);
+        return;
+      }
+
       // Calcular índice de día (0: Lun, ..., 6: Dom)
       // getUTCDay() da 0 para Domingo, 1 para Lunes...
       const dateObj = new Date(selectedDate + 'T00:00:00');
@@ -117,16 +158,33 @@ function PublicBooking() {
               />
 
               <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.85rem', opacity: 0.6 }}>Horarios Disponibles</label>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '10px' }}>
-                {hours.map(h => (
-                  <button 
-                    key={h}
-                    onClick={() => setSelectedTime(h)}
-                    style={{ padding: '0.8rem', borderRadius: '10px', border: '1px solid rgba(255,255,255,0.1)', background: selectedTime === h ? niche.primaryColor : 'rgba(255,255,255,0.05)', color: selectedTime === h ? '#000' : 'white', cursor: 'pointer', fontWeight: 600, transition: 'all 0.2s' }}
-                  >
-                    {h}
-                  </button>
-                ))}
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '10px', position: 'relative' }}>
+                {fetchingSlots && <div style={{ position: 'absolute', inset: 0, background: 'rgba(15,23,42,0.5)', zIndex: 10, borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Loader className="animate-spin" size={20}/></div>}
+                {hours.map(h => {
+                  const isBooked = bookedSlots.includes(h);
+                  return (
+                    <button 
+                      key={h}
+                      disabled={isBooked}
+                      onClick={() => setSelectedTime(h)}
+                      style={{ 
+                        padding: '0.8rem', 
+                        borderRadius: '10px', 
+                        border: isBooked ? '1px solid rgba(255,255,255,0.05)' : '1px solid rgba(255,255,255,0.1)', 
+                        background: selectedTime === h ? niche.primaryColor : (isBooked ? 'rgba(255,255,255,0.02)' : 'rgba(255,255,255,0.05)'), 
+                        color: selectedTime === h ? '#000' : (isBooked ? 'rgba(255,255,255,0.15)' : 'white'), 
+                        cursor: isBooked ? 'not-allowed' : 'pointer', 
+                        fontWeight: 600, 
+                        transition: 'all 0.2s',
+                        textDecoration: isBooked ? 'line-through' : 'none',
+                        position: 'relative'
+                      }}
+                    >
+                      {h}
+                      {isBooked && <span style={{ position: 'absolute', top: '2px', right: '4px', fontSize: '8px', color: 'rgba(255,255,255,0.2)' }}>OCUPADO</span>}
+                    </button>
+                  );
+                })}
               </div>
 
               <button 
