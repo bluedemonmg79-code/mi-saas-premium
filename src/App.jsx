@@ -2,6 +2,7 @@ import React, { useState, lazy, Suspense } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import DashboardLayout from './layouts/DashboardLayout';
 import ProtectedRoute from './components/ProtectedRoute';
+import ErrorBoundary from './components/ErrorBoundary';
 import { AuthProvider } from './context/AuthContext';
 import { ToastProvider } from './context/ToastContext';
 import './App.css';
@@ -29,40 +30,42 @@ function App() {
   const [currentNiche, setCurrentNiche] = useState('health');
 
   return (
-    <ToastProvider>
-      <AuthProvider>
-        <BrowserRouter>
-          <Suspense fallback={<PageLoader />}>
-            <Routes>
-              {/* Rutas Públicas */}
-              <Route path="/login" element={<Login />} />
-              <Route path="/pricing" element={<Pricing />} />
-              <Route path="/update-password" element={<UpdatePassword />} />
-              <Route path="/u/:username" element={<PublicBooking />} />
-              
-              {/* Rutas Protegidas por Login */}
-              <Route 
-                path="/dashboard" 
-                element={
-                  <ProtectedRoute>
-                    <DashboardLayout currentNiche={currentNiche} setCurrentNiche={setCurrentNiche} />
-                  </ProtectedRoute>
-                }
-              >
-                <Route index element={<Dashboard />} />
-                <Route path="entities" element={<EntityList />} />
-                <Route path="calendar" element={<CalendarView />} />
-                <Route path="settings" element={<SettingsView />} />
-              </Route>
-              
-              {/* Fallback */}
-              <Route path="/" element={<LandingPage />} />
-              <Route path="*" element={<Navigate to="/" replace />} />
-            </Routes>
-          </Suspense>
-        </BrowserRouter>
-      </AuthProvider>
-    </ToastProvider>
+    <ErrorBoundary>
+      <ToastProvider>
+        <AuthProvider>
+          <BrowserRouter>
+            <Suspense fallback={<PageLoader />}>
+              <Routes>
+                {/* Rutas Públicas */}
+                <Route path="/login" element={<Login />} />
+                <Route path="/pricing" element={<Pricing />} />
+                <Route path="/update-password" element={<UpdatePassword />} />
+                <Route path="/u/:username" element={<PublicBooking />} />
+                
+                {/* Rutas Protegidas por Login */}
+                <Route 
+                  path="/dashboard" 
+                  element={
+                    <ProtectedRoute>
+                      <DashboardLayout currentNiche={currentNiche} setCurrentNiche={setCurrentNiche} />
+                    </ProtectedRoute>
+                  }
+                >
+                  <Route index element={<Dashboard />} />
+                  <Route path="entities" element={<EntityList />} />
+                  <Route path="calendar" element={<CalendarView />} />
+                  <Route path="settings" element={<SettingsView />} />
+                </Route>
+                
+                {/* Fallback */}
+                <Route path="/" element={<LandingPage />} />
+                <Route path="*" element={<Navigate to="/" replace />} />
+              </Routes>
+            </Suspense>
+          </BrowserRouter>
+        </AuthProvider>
+      </ToastProvider>
+    </ErrorBoundary>
   );
 }
 

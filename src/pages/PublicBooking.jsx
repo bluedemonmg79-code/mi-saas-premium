@@ -62,8 +62,30 @@ function PublicBooking() {
     fetchBookedSlots();
   }, [selectedDate, prof]);
 
+  const getAvailableHours = (duration = 60) => {
+    const slots = [];
+    const morningStart = 9;
+    const morningEnd = 13;
+    const afternoonStart = 16;
+    const afternoonEnd = 21;
+
+    const addSlots = (start, end) => {
+      for (let h = start; h <= end; h++) {
+        const hourStr = h < 10 ? `0${h}` : `${h}`;
+        slots.push(`${hourStr}:00`);
+        if (duration === 30 && h < end) {
+          slots.push(`${hourStr}:30`);
+        }
+      }
+    };
+
+    addSlots(morningStart, morningEnd);
+    addSlots(afternoonStart, afternoonEnd);
+    return slots;
+  };
+
   const niche = prof ? NICHES[prof.niche || 'medicine'] : null;
-  const hours = ['09:00', '10:00', '11:00', '12:00', '13:00', '16:00', '17:00', '18:00'];
+  const hours = getAvailableHours(prof?.slot_duration || 60);
 
   const handleBooking = async (e) => {
     e.preventDefault();
@@ -85,6 +107,20 @@ function PublicBooking() {
         return;
       }
 
+      // Validación de fecha (No permitir pasado)
+      const today = new Date();
+      today.setHours(0,0,0,0);
+      const chosen = new Date(selectedDate + 'T00:00:00');
+      if (chosen < today) {
+        alert('No es posible agendar citas en fechas que ya pasaron.');
+        return;
+      }
+      
+      if (chosen.getDay() === 0) {
+        alert(t('booking.sunday_closed'));
+        return;
+      }
+
       const dateObj = new Date(selectedDate + 'T00:00:00');
       const dayIndex = (dateObj.getDay() + 6) % 7;
 
@@ -101,6 +137,15 @@ function PublicBooking() {
         origin: 'web'
       });
       if (error) throw error;
+
+      // Notificación para el dueño
+      await supabase.from('notifications').insert([{
+        user_id: prof.id,
+        title: '¡Nueva Reserva Web! 🌐',
+        message: `${form.name} ha agendado para el ${selectedDate} a las ${selectedTime}.`,
+        type: 'new_booking'
+      }]);
+
       setStep(3);
     } catch (err) {
       alert('Error: ' + err.message);
@@ -158,6 +203,13 @@ function PublicBooking() {
               <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.85rem', opacity: 0.6 }}>{t('booking.label_time')}</label>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '10px', position: 'relative' }}>
                 {fetchingSlots && <div style={{ position: 'absolute', inset: 0, background: 'rgba(15,23,42,0.5)', zIndex: 10, borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Loader className="animate-spin" size={20}/></div>}
+                
+                {hours.length > 0 && hours.every(h => bookedSlots.includes(h)) && !fetchingSlots && (
+                  <div style={{ gridColumn: 'span 3', textAlign: 'center', padding: '2rem', background: 'rgba(239,68,68,0.05)', borderRadius: '12px', border: '1px dashed rgba(239,68,68,0.2)', color: '#fca5a5', fontSize: '0.9rem' }}>
+                    {t('booking.no_availability')}
+                  </div>
+                )}
+
                 {hours.map(h => {
                   const isBooked = bookedSlots.includes(h);
                   return (
@@ -169,7 +221,7 @@ function PublicBooking() {
                         padding: '0.8rem', 
                         borderRadius: '10px', 
                         border: isBooked ? '1px solid rgba(255,255,255,0.05)' : '1px solid rgba(255,255,255,0.1)', 
-                        background: selectedTime === h ? niche.primaryColor : (isBooked ? 'rgba(255,255,255,0.02)' : 'rgba(255,255,255,0.05)'), 
+                        background: selectedTime === h ? (niche?.primaryColor || 'var(--accent-cyan)') : (isBooked ? 'rgba(255,255,255,0.02)' : 'rgba(255,255,255,0.05)'), 
                         color: selectedTime === h ? '#000' : (isBooked ? 'rgba(255,255,255,0.15)' : 'white'), 
                         cursor: isBooked ? 'not-allowed' : 'pointer', 
                         fontWeight: 600, 
@@ -187,7 +239,14 @@ function PublicBooking() {
 
               <button 
                 disabled={!selectedDate || !selectedTime}
-                onClick={() => setStep(2)}
+                onClick={() => {
+                  const chosen = new Date(selectedDate + 'T00:00:00');
+                  if (chosen.getDay() === 0) {
+                    alert(t('booking.sunday_closed'));
+                    return;
+                  }
+                  setStep(2);
+                }}
                 className="btn-primary" 
                 style={{ width: '100%', marginTop: '2rem', opacity: (!selectedDate || !selectedTime) ? 0.5 : 1 }}
               >

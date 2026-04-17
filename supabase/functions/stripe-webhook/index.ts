@@ -45,24 +45,28 @@ serve(async (request) => {
         })
 
         const priceId = fullSession?.line_items?.data[0]?.price?.id
-        
-        const PRICE_BASIC = Deno.env.get("STRIPE_PRICE_BASIC") || "price_1TKmAWRzHRtT8e1bzEtj0NMW"
-        const PRICE_PRO = Deno.env.get("STRIPE_PRICE_PRO") || "price_1TKmBxRzHRtT8e1bK6zXQaeC"
+        console.log(`Webhook: Recibido PriceID ${priceId}`)
 
-        let planType = 'premium' // Fallback
+        const PRICE_BASIC = Deno.env.get("STRIPE_PRICE_BASIC")
+        const PRICE_PRO = Deno.env.get("STRIPE_PRICE_PRO")
+
+        let planType = 'pro' // Default a Pro si hay duda tras un pago real
         if (priceId === PRICE_BASIC) {
           planType = 'basic'
         } else if (priceId === PRICE_PRO) {
           planType = 'pro'
         } else {
-          // Si por alguna razón es otro precio, lo dejamos como Pro por defecto u otro que definas
-          planType = 'pro'
+          console.log(`Webhook: El ID de precio ${priceId} no coincide con BASIC (${PRICE_BASIC}) ni PRO (${PRICE_PRO}). Asignando PRO por seguridad.`)
         }
 
         // Aplicar el estatus 'active' y el límite correcto
         await supabase
           .from('profiles')
-          .update({ subscription_status: 'active', plan_type: planType })
+          .update({ 
+            subscription_status: 'active', 
+            plan_type: planType,
+            stripe_customer_id: session.customer 
+          })
           .eq('id', userId)
           
         console.log(`Usuario ${userId} ha sido ascendido al plan ${planType} (Price: ${priceId})`)

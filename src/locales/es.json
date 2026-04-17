@@ -109,8 +109,85 @@
     "summary": "Reserva para el {{date}} a las {{time}}",
     "btn_confirm": "Confirmar Solicitud",
     "btn_booking_loading": "Agendando...",
+    "no_availability": "Sin disponibilidad para hoy. Prueba con otra fecha.",
+    "sunday_closed": "Lo sentimos, los domingos no laboramos. Por favor selecciona otro día.",
     "step3_title": "¡Solicitud Enviada!",
     "step3_desc": "Tu cita ha sido registrada. El profesional revisará tu solicitud y se pondrá en contacto contigo pronto.",
     "btn_back": "Regresar"
+  },
+  "dashboard": {
+    "welcome": "Buenos días",
+    "loading_auth": "Comprobando credenciales...",
+    "subtitle": "Su {{nicheLabel}} para el día de hoy.",
+    "upgrade_pro": "✦ Suscripción Pro Activa",
+    "upgrade_basic": "✦ Mejorar a Pro",
+    "upgrade_free": "✦ Escalar Sistema",
+    "pro_active": "✦ Suscripción Pro Activa",
+    "usage_label": "Uso",
+    "limit_reached": "¡Límite alcanzado! No puedes agregar más clientes.",
+    "limit_urgent": "¡Casi lleno! Solo te quedan {{remaining}} lugares.",
+    "usage_pct": "Vas al {{pct}}% de tu capacidad ({{count}}/{{limit}} {{label}}).",
+    "upgrade_to_basic": "Actualiza al Plan Básico para gestionar hasta 100 clientes.",
+    "upgrade_to_pro": "Actualiza al Plan Pro para gestionar clientes ilimitados.",
+    "view_basic": "Ver Plan Básico",
+    "upgrade_pro_btn": "Subir a Pro ✦",
+    "this_month": "Este mes",
+    "total_label": "Total de {{label}}",
+    "vs_previous": "vs mes anterior",
+    "upcoming_label": "Próximas {{label}}",
+    "view_all": "Ver todo",
+    "no_appointments": "No tienes citas agendadas aún.",
+    "book_now": "Agendar Ahora",
+    "quick_actions": "Acciones rápidas",
+    "confirm_appointment": "Confirmar Cita ⚡",
+    "send_whatsapp": "Enviar WhatsApp",
+    "cancel_appointment": "Cancelar Cita",
+    "delete_confirm": "¿Estás seguro de que deseas cancelar esta cita?"
+  },
+  "sidebar": {
+    "dashboard": "Panel",
+    "settings": "Configuración",
+    "notifications": "Notificaciones",
+    "logout": "Cerrar Sesión"
+  },
+  "notifications": {
+    "recent": "Recientes",
+    "mark_all": "Marcar todas",
+    "no_notifications": "No tienes avisos nuevos"
+  },
+  "onboarding": {
+    "mode_health": "Modo Dentista/Clínica",
+    "mode_legal": "Modo Abogado/Legal",
+    "mode_fitness": "Modo Gimnasio/Coach",
+    "mode_realestate": "Modo Inmobiliaria",
+    "mode_medicine": "Modo Consulta Médica"
+  },
+  "status": {
+    "active": "Activo",
+    "pending": "Pendiente",
+    "inactive": "Inactivo"
+  },
+  "entities": {
+    "search_placeholder": "Buscar por nombre, correo o teléfono...",
+    "new_entity": "Nuevo {{label}}",
+    "empty_state": "No hay {{label}} registrados aún.",
+    "phone_error": "Este cliente no tiene teléfono guardado",
+    "print_doc": "Imprimir Documento",
+    "label_contact": "Contacto",
+    "label_service": "Servicio/Motivo",
+    "label_status": "Estado",
+    "label_client": "Cliente/Paciente",
+    "export_csv": "Exportar CSV"
+  },
+  "calendar": {
+    "new_appointment": "Nueva {{label}}",
+    "edit_appointment": "Editar {{label}}",
+    "label_price": "Precio / Honorario ($)",
+    "btn_book": "Agendar",
+    "delete_confirm": "¿Estás seguro de que deseas eliminar esta cita?",
+    "delete_success": "Cita eliminada",
+    "save_success": "¡Cita agendada exitosamente!",
+    "update_success": "¡Cita actualizada correctamente!",
+    "error_occupied": "Este horario ya está ocupado por otra cita."
   }
 }

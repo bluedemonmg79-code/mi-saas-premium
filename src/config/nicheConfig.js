@@ -11,7 +11,10 @@ export const NICHES = {
       revenue: 'Ingresos Clínicos',
       welcome: 'Dr. González',
       newAction: 'Nueva Cita',
-      agendaT: 'Agenda Médica'
+      agendaT: 'Agenda Médica',
+      historyTitle: 'Historial Clínico Digital',
+      historyLabel: 'Notas de Evolución',
+      historyPlaceholder: 'Describe el estado actual, diagnóstico o tratamiento indicado hoy...'
     },
     catalog: [
       "J00 Resfriado común",
@@ -35,7 +38,10 @@ export const NICHES = {
       revenue: 'Honorarios',
       welcome: 'Lic. González',
       newAction: 'Nuevo Caso',
-      agendaT: 'Agenda de Audiencias'
+      agendaT: 'Agenda de Audiencias',
+      historyTitle: 'Expediente Jurídico Digital',
+      historyLabel: 'Avances del Caso / Notas Literales',
+      historyPlaceholder: 'Registra comparecencias, acuerdos o estrategias legales...'
     },
     catalog: [
       "Divorcio incausado", 
@@ -58,7 +64,10 @@ export const NICHES = {
       revenue: 'Membresías',
       welcome: 'Coach González',
       newAction: 'Nuevo Ingreso',
-      agendaT: 'Clases de Hoy'
+      agendaT: 'Clases de Hoy',
+      historyTitle: 'Seguimiento de Miembro',
+      historyLabel: 'Notas de Progreso y Salud',
+      historyPlaceholder: 'Registra medidas, objetivos alcanzados o lesiones...'
     },
     catalog: [
       "Plan de Hipertrofia", 
@@ -81,7 +90,10 @@ export const NICHES = {
       revenue: 'Ventas y Comisiones',
       welcome: 'Arqui',
       newAction: 'Nuevo Proyecto',
-      agendaT: 'Visitas Programadas'
+      agendaT: 'Visitas Programadas',
+      historyTitle: 'Ficha de Seguimiento Inmobiliario',
+      historyLabel: 'Notas de Interés y Ofertas',
+      historyPlaceholder: 'Anota preferencias de propiedad, presupuesto o feedback de visitas...'
     },
     catalog: [
       "Avalúo Comercial", 
@@ -104,7 +116,10 @@ export const NICHES = {
       revenue: 'Ingresos por Consulta',
       welcome: 'Dr. Medina',
       newAction: 'Nueva Consulta',
-      agendaT: 'Agenda de Consultas'
+      agendaT: 'Agenda de Consultas',
+      historyTitle: 'Expediente Clínico Digital',
+      historyLabel: 'Notas Médicas / Evolución',
+      historyPlaceholder: 'Indica síntomas, diagnóstico y plan de tratamiento...'
     },
     catalog: [
       "Z00.0 Examen médico general",

@@ -1,21 +1,25 @@
 import React, { useState, useEffect } from 'react';
 import { useOutletContext, useSearchParams } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { Users, Search, Plus, X, Phone, Mail, Calendar, ChevronRight, Edit2, Trash2, Lock, Download, MessageCircle, Printer } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
 import PaywallModal from '../components/PaywallModal';
+import PatientDetailView from '../components/PatientDetailView';
 
-const FREE_PLAN_LIMIT = 8; // Máximo de registros en plan gratuito
-const BASIC_PLAN_LIMIT = 50; // Máximo de registros en plan básico
+const FREE_PLAN_LIMIT = 20;  // Máximo de registros en plan gratuito
+const BASIC_PLAN_LIMIT = 100; // Máximo de registros en plan básico
 
-const statusConfig = {
-  active:   { label: 'Activo',    color: '#10b981', bg: 'rgba(16,185,129,0.15)' },
-  pending:  { label: 'Pendiente', color: '#f59e0b', bg: 'rgba(245,158,11,0.15)' },
-  inactive: { label: 'Inactivo', color: '#6b7280', bg: 'rgba(107,114,128,0.15)' },
-};
+const getStatusConfig = (t) => ({
+  active:   { label: t('status.active'),    color: '#10b981', bg: 'rgba(16,185,129,0.15)' },
+  pending:  { label: t('status.pending'), color: '#f59e0b', bg: 'rgba(245,158,11,0.15)' },
+  inactive: { label: t('status.inactive'), color: '#6b7280', bg: 'rgba(107,114,128,0.15)' },
+});
 
 function ProfileModal({ entity, config, onClose, onDelete, onUpdate }) {
+  const { t } = useTranslation();
+  const statusConfig = getStatusConfig(t);
   const s = statusConfig[entity.status] || statusConfig.active;
   const [editing, setEditing] = useState(false);
   const [form, setForm] = useState(entity);
@@ -31,7 +35,7 @@ function ProfileModal({ entity, config, onClose, onDelete, onUpdate }) {
 
   const openWhatsApp = () => {
     if (!entity.phone) {
-      toast.error('Este cliente no tiene teléfono guardado');
+      toast.error(t('entities.phone_error'));
       return;
     }
     const cleanPhone = entity.phone.replace(/\D/g, '');
@@ -69,10 +73,10 @@ function ProfileModal({ entity, config, onClose, onDelete, onUpdate }) {
             </div>
           </div>
           <div class="info-grid">
-            <div class="info-item"><label>Paciente / Cliente</label><div>${entity.name}</div></div>
-            <div class="info-item"><label>Contacto</label><div>${entity.phone || entity.email || 'N/A'}</div></div>
-            <div class="info-item"><label>Motivo / Servicio</label><div>${entity.detail || 'N/A'}</div></div>
-            <div class="info-item"><label>Estado</label><div>${s.label}</div></div>
+            <div class="info-item"><label>${t('entities.label_client')}</label><div>${entity.name}</div></div>
+            <div class="info-item"><label>${t('entities.label_contact')}</label><div>${entity.phone || entity.email || 'N/A'}</div></div>
+            <div class="info-item"><label>${t('entities.label_service')}</label><div>${entity.detail || 'N/A'}</div></div>
+            <div class="info-item"><label>${t('entities.label_status')}</label><div>${s.label}</div></div>
           </div>
           <p style="color: #64748b; font-size: 0.9rem; margin-bottom: 25px;">Documento generado electrónicamente en la fecha mencionada.</p>
           
@@ -109,7 +113,25 @@ function ProfileModal({ entity, config, onClose, onDelete, onUpdate }) {
         <div style={{ position: 'absolute', top: '1.2rem', right: '1.2rem', display: 'flex', gap: '8px' }}>
           {!editing && <button onClick={() => setEditing(true)} style={{ background: 'rgba(99,102,241,0.15)', color: '#a5b4fc', border: 'none', cursor: 'pointer', borderRadius: '8px', padding: '6px' }}><Edit2 size={16} /></button>}
           {editing && <button onClick={() => setEditing(false)} style={{ background: 'rgba(255,255,255,0.1)', color: 'white', border: 'none', cursor: 'pointer', borderRadius: '8px', padding: '6px' }}>Cancelar</button>}
-          <button onClick={() => { if(window.confirm('¿Seguro que deseas borrar este registro?')) onDelete(entity.id); }} style={{ background: 'rgba(239,68,68,0.15)', color: '#fca5a5', border: 'none', cursor: 'pointer', borderRadius: '8px', padding: '6px' }}><Trash2 size={16} /></button>
+          <button 
+            onClick={() => { 
+              if (userRole === 'member') {
+                toast.error('Solo el dueño puede eliminar registros');
+                return;
+              }
+              if(window.confirm('¿Seguro que deseas borrar este registro?')) onDelete(entity.id); 
+            }} 
+            style={{ 
+              background: 'rgba(239,68,68,0.15)', 
+              color: userRole === 'member' ? '#6b7280' : '#fca5a5', 
+              border: 'none', 
+              cursor: userRole === 'member' ? 'not-allowed' : 'pointer', 
+              borderRadius: '8px', 
+              padding: '6px' 
+            }}
+          >
+            <Trash2 size={16} />
+          </button>
           <button onClick={onClose} style={{ background: 'rgba(255,255,255,0.05)', border: 'none', color: 'white', cursor: 'pointer', borderRadius: '8px', padding: '6px' }}><X size={16} /></button>
         </div>
 
@@ -195,13 +217,15 @@ function NewEntityModal({ config, onClose, onSave }) {
 }
 
 function EntityList() {
-  const { config, currentNiche, userProfile } = useOutletContext();
+  const { t } = useTranslation();
+  const { config, currentNiche, userProfile, userRole, ownerId } = useOutletContext();
   const { user } = useAuth();
   const toast = useToast();
+  const statusConfig = getStatusConfig(t);
   const [search, setSearch] = useState('');
   const [entities, setEntities] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [selected, setSelected] = useState(null);
+  const [showDetail, setShowDetail] = useState(null);
   const [showNew, setShowNew] = useState(false);
   const [showPaywall, setShowPaywall] = useState(false);
   const [searchParams, setSearchParams] = useSearchParams();
@@ -231,38 +255,51 @@ function EntityList() {
 
   const fetchEntities = async () => {
     setLoading(true);
+    // IMPORTANTE: Los miembros filtran por el ownerId del jefe
     const { data, error } = await supabase
       .from('entities')
       .select('*')
-      .eq('user_id', user.id)
+      .eq('user_id', ownerId || user.id)
       .eq('niche', currentNiche)
       .order('created_at', { ascending: false });
     if (!error) setEntities(data || []);
     setLoading(false);
   };
 
-  useEffect(() => { fetchEntities(); }, [currentNiche]);
+  useEffect(() => { fetchEntities(); }, [currentNiche, ownerId]);
 
   const handleSave = async (form) => {
     const avatar = form.name.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase();
     const { error } = await supabase.from('entities').insert([{
-      user_id: user.id, niche: currentNiche, avatar,
-      name: form.name, email: form.email, phone: form.phone,
-      detail: form.detail, notes: form.notes, status: 'active'
+      user_id: ownerId || user.id, // Siempre guardar a nombre del dueño
+      niche: currentNiche, 
+      avatar,
+      name: form.name, 
+      email: form.email, 
+      phone: form.phone,
+      detail: form.detail,
+      notes: form.notes,
+      status: 'active'
     }]);
+
     if (!error) {
-      toast.success('Registro añadido');
+      toast.success('¡Registro guardado exitosamente!');
+      setShowNew(false);
       fetchEntities();
     } else {
-      toast.error('Error al agregar');
+      toast.error('Error al guardar: ' + error.message);
     }
   };
 
   const handleDelete = async (id) => {
+    if (userRole === 'member') {
+      toast.error('No tienes permiso para borrar registros.');
+      return;
+    }
     const { error } = await supabase.from('entities').delete().eq('id', id);
     if (!error) {
-      toast.success('Eliminado de forma permanente');
-      setSelected(null);
+      toast.success('Registro eliminado');
+      setShowDetail(null);
       fetchEntities();
     }
   };
@@ -274,7 +311,7 @@ function EntityList() {
     }).eq('id', id);
     if (!error) {
       toast.success('Actualizado correctamente');
-      setSelected({ ...selected, ...newForm, avatar });
+      setShowDetail({ ...showDetail, ...newForm, avatar });
       fetchEntities();
     } else {
       toast.error('Ocurrió un error al actualizar');
@@ -306,7 +343,23 @@ function EntityList() {
 
   return (
     <>
-      {selected && <ProfileModal entity={selected} config={config} onClose={() => setSelected(null)} onDelete={handleDelete} onUpdate={handleUpdate} />}
+      {showDetail && (
+        currentNiche === 'medicine' ? (
+          <PatientDetailView 
+            entity={showDetail} 
+            config={config} 
+            onClose={() => setShowDetail(null)} 
+          />
+        ) : (
+          <ProfileModal 
+            entity={showDetail} 
+            config={config} 
+            onClose={() => setShowDetail(null)} 
+            onDelete={handleDelete}
+            onUpdate={handleUpdate}
+          />
+        )
+      )}
       {showNew && <NewEntityModal config={config} onClose={() => setShowNew(false)} onSave={handleSave} />}
       {showPaywall && <PaywallModal onClose={() => setShowPaywall(false)} limitType="entities" />}
 
@@ -316,13 +369,13 @@ function EntityList() {
           <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', flexWrap: 'wrap' }}>
             <div style={{ display: 'flex', alignItems: 'center', background: 'rgba(255,255,255,0.05)', padding: '0.5rem 1rem', borderRadius: '10px', border: '1px solid rgba(255,255,255,0.08)', gap: '8px' }}>
               <Search size={16} color="rgba(255,255,255,0.4)" />
-              <input value={search} onChange={e => setSearch(e.target.value)} placeholder={`Buscar...`} style={{ background: 'transparent', border: 'none', color: 'white', outline: 'none', width: '180px', fontFamily: 'inherit' }} />
+              <input value={search} onChange={e => setSearch(e.target.value)} placeholder={t('entities.search_placeholder')} style={{ background: 'transparent', border: 'none', color: 'white', outline: 'none', width: '180px', fontFamily: 'inherit' }} />
             </div>
             <button onClick={exportToCSV} style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '0.65rem 1rem', borderRadius: '10px', border: '1px solid rgba(255,255,255,0.1)', background: 'rgba(255,255,255,0.05)', color: 'white', cursor: 'pointer', fontSize: '0.9rem', fontFamily: 'inherit' }}>
-              <Download size={16} /> Exportar CSV
+              <Download size={16} /> {t('entities.export_csv', { defaultValue: 'Exportar CSV' })}
             </button>
             <button onClick={handleNewClick} className="btn-primary" style={{ margin: 0 }}>
-              {entities.length >= currentLimit ? <Lock size={16} /> : <Plus size={16} />} Nuevo
+              {entities.length >= currentLimit ? <Lock size={16} /> : <Plus size={16} />} {t('entities.new_entity', { label: (config.labels.clients || 'Cliente').substring(0, config.labels.clients.length - 1) })}
             </button>
           </div>
         </div>
@@ -347,7 +400,7 @@ function EntityList() {
               <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                 <thead>
                   <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
-                    {['Nombre', 'Contacto', 'Servicio', 'Estado', 'Registro', ''].map(h => (
+                    {[t('entities.label_name', { defaultValue: 'Nombre' }), t('entities.label_contact'), t('entities.label_service'), t('entities.label_status'), t('entities.label_date', { defaultValue: 'Registro' }), ''].map(h => (
                       <th key={h} style={{ padding: '0.75rem 1rem', textAlign: 'left', fontSize: '0.8rem', color: 'rgba(255,255,255,0.4)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>{h}</th>
                     ))}
                   </tr>
@@ -356,7 +409,7 @@ function EntityList() {
                   {filtered.map(entity => {
                     const s = statusConfig[entity.status] || statusConfig.active;
                     return (
-                      <tr key={entity.id} onClick={() => setSelected(entity)} style={{ borderBottom: '1px solid rgba(255,255,255,0.04)', cursor: 'pointer', transition: 'background 0.2s' }}
+                      <tr key={entity.id} onClick={() => setShowDetail(entity)} style={{ borderBottom: '1px solid rgba(255,255,255,0.04)', cursor: 'pointer', transition: 'background 0.2s' }}
                         onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,255,255,0.03)'}
                         onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
                         <td style={{ padding: '1rem' }}>

@@ -111,6 +111,86 @@
     "btn_booking_loading": "Booking...",
     "step3_title": "Request Sent!",
     "step3_desc": "Your appointment has been registered. The professional will review your request and contact you soon.",
-    "btn_back": "Go Back"
+    "btn_back": "Go Back",
+    "no_availability": "No availability for today. Try another date.",
+    "sunday_closed": "Sorry, we do not work on Sundays. Please select another day."
+  },
+  "dashboard": {
+    "welcome": "Good morning",
+    "loading_auth": "Checking credentials...",
+    "upgrade_pro": "✦ Pro Subscription Active",
+    "upgrade_basic": "✦ Upgrade to Pro",
+    "upgrade_free": "✦ Scale System",
+    "pro_active": "✦ Pro Subscription Active",
+    "usage_label": "Usage",
+    "subtitle": "Your {{nicheLabel}} for today.",
+    "upgrade_pro": "✦ Pro Subscription Active",
+    "upgrade_basic": "✦ Upgrade to Pro",
+    "upgrade_free": "✦ Scale System",
+    "limit_reached": "Limit reached! You cannot add more clients.",
+    "limit_urgent": "Almost full! Only {{remaining}} spots left.",
+    "usage_pct": "You are at {{pct}}% capacity ({{count}}/{{limit}} {{label}}).",
+    "upgrade_to_basic": "Upgrade to Basic Plan to manage up to 100 clients.",
+    "upgrade_to_pro": "Upgrade to Pro Plan for unlimited clients.",
+    "view_basic": "View Basic Plan",
+    "upgrade_pro_btn": "Go Pro ✦",
+    "this_month": "This month",
+    "total_label": "Total {{label}}",
+    "vs_previous": "vs previous month",
+    "upcoming_label": "Upcoming {{label}}",
+    "view_all": "View all",
+    "no_appointments": "No scheduled appointments yet.",
+    "book_now": "Book Now",
+    "quick_actions": "Quick actions",
+    "confirm_appointment": "Confirm Appointment ⚡",
+    "send_whatsapp": "Send WhatsApp",
+    "cancel_appointment": "Cancel Appointment",
+    "delete_confirm": "Are you sure you want to cancel this appointment?"
+  },
+  "sidebar": {
+    "dashboard": "Dashboard",
+    "settings": "Settings",
+    "notifications": "Notifications",
+    "logout": "Log Out"
+  },
+  "notifications": {
+    "recent": "Recent",
+    "mark_all": "Mark all as read",
+    "no_notifications": "No new notifications"
+  },
+  "onboarding": {
+    "mode_health": "Dentist/Clinic Mode",
+    "mode_legal": "Lawyer/Legal Mode",
+    "mode_fitness": "Gym/Coach Mode",
+    "mode_realestate": "Real Estate Mode",
+    "mode_medicine": "Medical Consultation Mode"
+  },
+  "status": {
+    "active": "Active",
+    "pending": "Pending",
+    "inactive": "Inactive"
+  },
+  "entities": {
+    "search_placeholder": "Search by name, email or phone...",
+    "new_entity": "New {{label}}",
+    "empty_state": "No {{label}} registered yet.",
+    "phone_error": "This client has no saved phone number",
+    "print_doc": "Print Document",
+    "label_contact": "Contact",
+    "label_service": "Service/Reason",
+    "label_status": "Status",
+    "label_client": "Client/Patient",
+    "export_csv": "Export CSV"
+  },
+  "calendar": {
+    "new_appointment": "New {{label}}",
+    "edit_appointment": "Edit {{label}}",
+    "label_price": "Price / Fee ($)",
+    "btn_book": "Book",
+    "delete_confirm": "Are you sure you want to delete this appointment?",
+    "delete_success": "Appointment deleted",
+    "save_success": "Appointment scheduled successfully!",
+    "update_success": "Appointment updated successfully!",
+    "error_occupied": "This time slot is already occupied by another appointment."
   }
 }

@@ -11,13 +11,13 @@ function PaywallModal({ onClose, limitType = 'entities' }) {
 
   const messages = {
     entities: {
-      title: 'Límite del Plan Gratuito',
-      description: 'Has alcanzado el máximo de 3 registros en el Plan Básico gratuito.',
+      title: 'Límite de Clientes Alcanzado',
+      description: 'Has llegado al límite de registros permitidos en tu plan actual.',
       feature: 'registros ilimitados',
     },
     appointments: {
-      title: 'Límite del Plan Gratuito',
-      description: 'Has alcanzado el máximo de citas en el Plan Gratuito.',
+      title: 'Límite de Agenda',
+      description: 'Mejora tu plan para seguir agendando citas sin restricciones.',
       feature: 'agenda sin límites',
     },
   };
